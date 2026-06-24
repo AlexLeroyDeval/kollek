@@ -121,7 +121,7 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
             <div className="flex-shrink-0 w-40">
               <div className="relative aspect-[3/4] rounded-lg overflow-hidden" style={{ background: 'var(--background)' }}>
                 {coverUrl ? (
-                  <Image src={coverUrl} alt={game?.title ?? ''} fill className="object-cover" />
+                  <Image src={coverUrl} alt={game?.title ?? ''} fill sizes="160px" className="object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-xs p-2" style={{ color: 'var(--muted)' }}>
                     {game?.title}

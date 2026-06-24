@@ -23,7 +23,7 @@ export function CollectionGrid({ data, onSelect }: { data: CollectionEntry[]; on
             <div className="relative aspect-[3/4] rounded-lg overflow-hidden transition-all duration-200 group-hover:-translate-y-1"
               style={{ background: 'var(--surface)', boxShadow: '0 0 0 1px var(--border)' }}>
               {coverUrl ? (
-                <Image src={coverUrl} alt={game?.title ?? ''} fill
+                <Image src={coverUrl} alt={game?.title ?? ''} fill sizes="(max-width: 640px) 33vw, 160px"
                   className={`object-cover transition-transform duration-300 group-hover:scale-105 ${entry.is_sold ? 'opacity-50 grayscale' : ''}`} />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-xs text-center p-2"
