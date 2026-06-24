@@ -25,11 +25,13 @@ const addSchema = z.object({
   platform_igdb_id: z.number(),
   platform_name: z.string(),
   platform_abbreviation: z.string().optional(),
+  platform_family: z.string().optional(),
   title: z.string(),
   release_year: z.number().optional(),
   cover_front_url: z.string().optional(),
   condition: z.enum(['Mint', 'Very Good', 'Good', 'Fair', 'Poor']),
   completion: z.enum(COMPLETION_VALUES),
+  edition: z.string().optional(),
   purchase_price: z.number().optional(),
   purchase_date: z.string().optional(),
   notes: z.string().optional(),
@@ -48,7 +50,7 @@ export async function POST(req: NextRequest) {
   // 1. Upsert platform
   const { data: platform, error: platformError } = await supabase
     .from('platform')
-    .upsert({ igdb_id: data.platform_igdb_id, name: data.platform_name, abbreviation: data.platform_abbreviation ?? null }, { onConflict: 'igdb_id' })
+    .upsert({ igdb_id: data.platform_igdb_id, name: data.platform_name, abbreviation: data.platform_abbreviation ?? null, manufacturer: data.platform_family ?? null }, { onConflict: 'igdb_id' })
     .select('id')
     .single()
 
@@ -59,11 +61,14 @@ export async function POST(req: NextRequest) {
   const sourceCover = euCover ?? data.cover_front_url ?? null
 
   // 3. Copy cover to Supabase Storage
-  let cover_front_url = sourceCover
+  // URL IGDB absolue (jamais protocole-relative) + grande taille — sert aussi de fallback
+  let cover_front_url: string | null = null
   if (sourceCover) {
-    const igdbUrl = sourceCover.startsWith('//')
-      ? `https:${sourceCover.replace('t_thumb', 't_cover_big')}`
-      : sourceCover.replace('t_thumb', 't_cover_big')
+    const igdbUrl = (sourceCover.startsWith('//')
+      ? `https:${sourceCover}`
+      : sourceCover
+    ).replace('t_thumb', 't_cover_big')
+    cover_front_url = igdbUrl // fallback absolu si l'upload échoue
 
     try {
       const imgRes = await fetch(igdbUrl)
@@ -103,6 +108,7 @@ export async function POST(req: NextRequest) {
       game_id: game.id,
       condition: data.condition,
       completion: data.completion,
+      edition: data.edition?.trim() || null,
       purchase_price: data.purchase_price ?? null,
       purchase_date: data.purchase_date ?? null,
       notes: data.notes ?? null,

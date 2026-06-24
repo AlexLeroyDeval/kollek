@@ -38,6 +38,7 @@ export type CollectionEntry = {
   game_id: number
   condition: Condition
   completion: Completion
+  edition: string | null
   purchase_price: number | null
   purchase_date: string | null
   is_sold: boolean
@@ -52,7 +53,7 @@ export type IgdbGame = {
   id: number
   name: string
   cover?: { id: number; url: string }
-  platforms?: { id: number; name: string; abbreviation?: string }[]
+  platforms?: { id: number; name: string; abbreviation?: string; platform_family?: { id: number; name: string } }[]
   first_release_date?: number
   genres?: { id: number; name: string }[]
   involved_companies?: {

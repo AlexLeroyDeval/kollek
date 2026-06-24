@@ -8,9 +8,16 @@ import { toast } from 'sonner'
 import { IgdbGame, Condition, Completion } from '@/types'
 import { COMPLETIONS } from '@/lib/completion'
 import { useDebounce } from '@/hooks/useDebounce'
+import { EditionField } from './EditionField'
 import Image from 'next/image'
 
-type SelectedGame = IgdbGame & { selectedPlatformId: number; selectedPlatformName: string; selectedPlatformAbbr?: string }
+type IgdbPlatform = NonNullable<IgdbGame['platforms']>[number]
+type SelectedGame = IgdbGame & {
+  selectedPlatformId: number
+  selectedPlatformName: string
+  selectedPlatformAbbr?: string
+  selectedPlatformFamily?: string
+}
 
 const CONDITIONS: Condition[] = ['Mint', 'Very Good', 'Good', 'Fair', 'Poor']
 
@@ -20,6 +27,7 @@ export function AddGameDialog() {
   const [selected, setSelected] = useState<SelectedGame | null>(null)
   const [condition, setCondition] = useState<Condition>('Very Good')
   const [completion, setCompletion] = useState<Completion>('loose')
+  const [edition, setEdition] = useState('')
   const [purchasePrice, setPurchasePrice] = useState('')
   const [purchaseDate, setPurchaseDate] = useState('')
   const [notes, setNotes] = useState('')
@@ -48,11 +56,13 @@ export function AddGameDialog() {
           platform_igdb_id: selected.selectedPlatformId,
           platform_name: selected.selectedPlatformName,
           platform_abbreviation: selected.selectedPlatformAbbr,
+          platform_family: selected.selectedPlatformFamily,
           title: selected.matched_alt_name ?? selected.name,
           release_year: selected.first_release_date ? new Date(selected.first_release_date * 1000).getFullYear() : undefined,
           cover_front_url: selected.cover?.url,
           condition,
           completion,
+          edition: edition.trim() || undefined,
           purchase_price: purchasePrice ? parseFloat(purchasePrice) : undefined,
           purchase_date: purchaseDate || undefined,
           notes: notes || undefined,
@@ -77,13 +87,20 @@ export function AddGameDialog() {
     setSelected(null)
     setCondition('Very Good')
     setCompletion('loose')
+    setEdition('')
     setPurchasePrice('')
     setPurchaseDate('')
     setNotes('')
   }
 
-  function selectGame(game: IgdbGame, platformId: number, platformName: string, platformAbbr?: string) {
-    setSelected({ ...game, selectedPlatformId: platformId, selectedPlatformName: platformName, selectedPlatformAbbr: platformAbbr })
+  function selectGame(game: IgdbGame, platform: IgdbPlatform) {
+    setSelected({
+      ...game,
+      selectedPlatformId: platform.id,
+      selectedPlatformName: platform.name,
+      selectedPlatformAbbr: platform.abbreviation,
+      selectedPlatformFamily: platform.platform_family?.name,
+    })
   }
 
   const coverUrl = selected?.cover?.url
@@ -136,7 +153,7 @@ export function AddGameDialog() {
                     <div key={game.id}>
                       {game.platforms && game.platforms.length > 1 ? (
                         game.platforms.map((p) => (
-                          <button key={p.id} onClick={() => selectGame(game, p.id, p.name, p.abbreviation)}
+                          <button key={p.id} onClick={() => selectGame(game, p)}
                             className="w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors hover:opacity-80"
                             style={{ background: 'var(--background)' }}>
                             {game.cover && (
@@ -153,7 +170,7 @@ export function AddGameDialog() {
                           </button>
                         ))
                       ) : (
-                        <button onClick={() => selectGame(game, game.platforms![0].id, game.platforms![0].name, game.platforms![0].abbreviation)}
+                        <button onClick={() => selectGame(game, game.platforms![0])}
                           className="w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors hover:opacity-80"
                           style={{ background: 'var(--background)' }}>
                           {game.cover && (
@@ -255,6 +272,9 @@ export function AddGameDialog() {
                     style={{ background: 'var(--background)', border: '1px solid var(--border)', color: 'var(--foreground)' }} />
                 </div>
               </div>
+
+              {/* Édition */}
+              <EditionField value={edition} onChange={setEdition} family={selected.selectedPlatformFamily} />
 
               {/* Notes */}
               <div className="space-y-1.5">

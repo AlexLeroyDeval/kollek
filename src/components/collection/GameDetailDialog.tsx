@@ -8,6 +8,8 @@ import { toast } from 'sonner'
 import Image from 'next/image'
 import { CollectionEntry, Condition, Completion } from '@/types'
 import { COMPLETIONS, completionLabel } from '@/lib/completion'
+import { isStandardEdition } from '@/lib/editions'
+import { EditionField } from './EditionField'
 
 const CONDITIONS: Condition[] = ['Mint', 'Very Good', 'Good', 'Fair', 'Poor']
 
@@ -19,6 +21,7 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
 
   const [condition, setCondition] = useState<Condition>('Very Good')
   const [completion, setCompletion] = useState<Completion>('loose')
+  const [edition, setEdition] = useState('')
   const [purchasePrice, setPurchasePrice] = useState('')
   const [purchaseDate, setPurchaseDate] = useState('')
   const [notes, setNotes] = useState('')
@@ -29,6 +32,7 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
     if (entry) {
       setCondition(entry.condition)
       setCompletion(entry.completion)
+      setEdition(entry.edition ?? '')
       setPurchasePrice(entry.purchase_price?.toString() ?? '')
       setPurchaseDate(entry.purchase_date ?? '')
       setNotes(entry.notes ?? '')
@@ -78,12 +82,14 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
   if (!entry) return null
 
   const game = entry.game
-  const coverUrl = game?.cover_front_url ?? null
+  const rawCover = game?.cover_front_url ?? null
+  const coverUrl = rawCover?.startsWith('//') ? `https:${rawCover}` : rawCover
 
   function handleSaveEdit() {
     save({
       condition,
       completion,
+      edition: edition.trim() || null,
       purchase_price: purchasePrice ? parseFloat(purchasePrice) : null,
       purchase_date: purchaseDate || null,
       notes: notes || null,
@@ -139,6 +145,7 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
                 <>
                   <Field label="État" value={entry.condition} />
                   <Field label="Completion" value={completionLabel(entry.completion)} />
+                  {!isStandardEdition(entry.edition) && <Field label="Édition" value={entry.edition!} accent />}
                   <Field label="Prix d'achat" value={entry.purchase_price != null ? `${entry.purchase_price} €` : '—'} />
                   <Field label="Date d'achat" value={entry.purchase_date ? new Date(entry.purchase_date).toLocaleDateString('fr-FR') : '—'} />
                   {entry.is_sold && (
@@ -167,6 +174,7 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
                       ))}
                     </div>
                   </div>
+                  <EditionField value={edition} onChange={setEdition} family={game?.platform?.manufacturer} />
                   <div className="grid grid-cols-2 gap-3">
                     <Input label="Prix d'achat (€)" type="number" value={purchasePrice} onChange={setPurchasePrice} />
                     <Input label="Date d'achat" type="date" value={purchaseDate} onChange={setPurchaseDate} />

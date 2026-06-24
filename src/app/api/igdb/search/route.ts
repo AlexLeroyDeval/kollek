@@ -12,7 +12,7 @@ const MAX_RESULTS = 20
 
 // Champs jeu réutilisés pour les deux requêtes
 const GAME_FIELDS =
-  'name, cover.url, platforms.name, platforms.abbreviation, platforms.id, first_release_date'
+  'name, cover.url, platforms.name, platforms.abbreviation, platforms.id, platforms.platform_family.name, first_release_date'
 
 type AltNameResult = {
   id: number

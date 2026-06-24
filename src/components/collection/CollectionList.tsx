@@ -3,6 +3,7 @@
 import { CollectionEntry } from '@/types'
 import { completionLabel } from '@/lib/completion'
 import { CONDITION_COLOR } from '@/lib/condition'
+import { isStandardEdition } from '@/lib/editions'
 
 export function CollectionList({ data, onSelect }: { data: CollectionEntry[]; onSelect: (e: CollectionEntry) => void }) {
   if (data.length === 0) return (
@@ -25,7 +26,17 @@ export function CollectionList({ data, onSelect }: { data: CollectionEntry[]; on
           {data.map((entry) => (
             <tr key={entry.id} onClick={() => onSelect(entry)} className="transition-colors hover:opacity-80 cursor-pointer"
               style={{ borderBottom: '1px solid var(--border)' }}>
-              <td className="px-4 py-3 font-medium max-w-[240px] truncate">{entry.game?.title ?? '—'}</td>
+              <td className="px-4 py-3 font-medium max-w-[280px]">
+                <span className="flex items-center gap-2 min-w-0">
+                  <span className="truncate">{entry.game?.title ?? '—'}</span>
+                  {!isStandardEdition(entry.edition) && (
+                    <span className="flex-shrink-0 px-1.5 py-0.5 rounded text-[10px] font-medium"
+                      style={{ background: 'var(--surface-hover)', color: 'var(--accent)' }}>
+                      {entry.edition}
+                    </span>
+                  )}
+                </span>
+              </td>
               <td className="px-4 py-3 whitespace-nowrap" style={{ color: 'var(--muted)' }}>
                 {entry.game?.platform?.abbreviation ?? entry.game?.platform?.name ?? '—'}
               </td>

@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { CollectionEntry } from '@/types'
 import { completionLabel } from '@/lib/completion'
 import { CONDITION_COLOR } from '@/lib/condition'
+import { isStandardEdition } from '@/lib/editions'
 
 export function CollectionGrid({ data, onSelect }: { data: CollectionEntry[]; onSelect: (e: CollectionEntry) => void }) {
   if (data.length === 0) return (
@@ -16,7 +17,8 @@ export function CollectionGrid({ data, onSelect }: { data: CollectionEntry[]; on
     <div className="p-6 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4">
       {data.map((entry) => {
         const game = entry.game
-        const coverUrl = game?.cover_front_url ?? null
+        const rawCover = game?.cover_front_url ?? null
+        const coverUrl = rawCover?.startsWith('//') ? `https:${rawCover}` : rawCover
 
         return (
           <div key={entry.id} onClick={() => onSelect(entry)} className="flex flex-col gap-2 group cursor-pointer">
@@ -42,6 +44,15 @@ export function CollectionGrid({ data, onSelect }: { data: CollectionEntry[]; on
                 <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide"
                   style={{ background: 'var(--accent)', color: '#0A0A0A' }}>
                   Vendu
+                </div>
+              )}
+
+              {/* Badge Édition (bas) */}
+              {!isStandardEdition(entry.edition) && (
+                <div className="absolute bottom-1.5 left-1.5 right-1.5 px-1.5 py-0.5 rounded text-[10px] font-medium truncate text-center"
+                  style={{ background: 'rgba(0,0,0,0.78)', color: 'var(--foreground)' }}
+                  title={entry.edition!}>
+                  {entry.edition}
                 </div>
               )}
             </div>
