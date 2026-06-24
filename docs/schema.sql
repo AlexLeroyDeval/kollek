@@ -55,6 +55,7 @@ create table game_company (
 -- COLLECTION
 create table collection (
   id             serial primary key,
+  user_id        uuid references auth.users(id) default auth.uid(),
   game_id        integer not null references game(id) on delete cascade,
   condition      text not null check (condition in ('Mint','Very Good','Good','Fair','Poor')),
   completion     text not null check (completion in ('loose','cib','box_game','box_notice','game_notice','notice','box','sealed')),
@@ -71,6 +72,7 @@ create table collection (
 -- WISHLIST (créée au MVP, alimentée en v1.2)
 create table wishlist (
   id         serial primary key,
+  user_id    uuid references auth.users(id) default auth.uid(),
   game_id    integer not null references game(id) on delete cascade,
   priority   text check (priority in ('Low','Medium','High')),
   max_budget numeric(10,2),
@@ -91,9 +93,9 @@ create table market_price (
 );
 
 -- =============================================
--- RLS — Row Level Security
--- Usage perso (MVP) : accès public en lecture/écriture
--- À restreindre en v2 (multi-utilisateur)
+-- RLS — Row Level Security (multi-utilisateur)
+-- collection & wishlist : privées (chacun les siennes)
+-- catalogue : partagé entre utilisateurs connectés
 -- =============================================
 
 alter table platform     enable row level security;
@@ -105,15 +107,19 @@ alter table collection   enable row level security;
 alter table wishlist     enable row level security;
 alter table market_price enable row level security;
 
--- Policies MVP : tout autoriser (usage perso, pas de login)
-create policy "allow all" on platform     for all using (true) with check (true);
-create policy "allow all" on genre        for all using (true) with check (true);
-create policy "allow all" on publisher    for all using (true) with check (true);
-create policy "allow all" on game         for all using (true) with check (true);
-create policy "allow all" on game_company for all using (true) with check (true);
-create policy "allow all" on collection   for all using (true) with check (true);
-create policy "allow all" on wishlist     for all using (true) with check (true);
-create policy "allow all" on market_price for all using (true) with check (true);
+-- Privé par utilisateur
+create policy "own collection" on collection for all
+  to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy "own wishlist" on wishlist for all
+  to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- Catalogue partagé (utilisateurs connectés)
+create policy "catalog rw" on platform     for all to authenticated using (true) with check (true);
+create policy "catalog rw" on genre        for all to authenticated using (true) with check (true);
+create policy "catalog rw" on publisher    for all to authenticated using (true) with check (true);
+create policy "catalog rw" on game         for all to authenticated using (true) with check (true);
+create policy "catalog rw" on game_company for all to authenticated using (true) with check (true);
+create policy "market read" on market_price for select to authenticated using (true);
 
 -- =============================================
 -- Storage — bucket pour les covers

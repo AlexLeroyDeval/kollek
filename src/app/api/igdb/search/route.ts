@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { igdbQuery } from '@/lib/igdb/client'
 import { similarity } from '@/lib/fuzzy'
+import { createClient } from '@/lib/supabase/server'
 import { IgdbGame } from '@/types'
 import { z } from 'zod'
 
@@ -21,6 +22,10 @@ type AltNameResult = {
 }
 
 export async function GET(req: NextRequest) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+
   const result = schema.safeParse({ q: req.nextUrl.searchParams.get('q') })
   if (!result.success) return NextResponse.json({ error: 'Invalid query' }, { status: 400 })
 

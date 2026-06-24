@@ -47,6 +47,9 @@ export async function POST(req: NextRequest) {
   const data = result.data
   const supabase = await createClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+
   // 1. Upsert platform
   const { data: platform, error: platformError } = await supabase
     .from('platform')
@@ -123,6 +126,9 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
   const { data, error } = await supabase
     .from('collection')
