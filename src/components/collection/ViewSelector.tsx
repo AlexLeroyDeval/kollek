@@ -1,6 +1,7 @@
 'use client'
 
 import { LayoutGrid, List } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { ViewMode } from '@/types'
 
 const VIEWS: { mode: ViewMode; icon: React.ReactNode; label: string }[] = [
@@ -11,17 +12,25 @@ const VIEWS: { mode: ViewMode; icon: React.ReactNode; label: string }[] = [
 export function ViewSelector({ view, onChange }: { view: ViewMode; onChange: (v: ViewMode) => void }) {
   return (
     <div className="flex items-center gap-0.5 p-1 rounded-lg" style={{ background: 'var(--surface)' }}>
-      {VIEWS.map(({ mode, icon, label }) => (
-        <button key={mode} onClick={() => onChange(mode)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
-          style={view === mode
-            ? { background: 'var(--accent)', color: '#0A0A0A' }
-            : { color: 'var(--muted)' }}
-          title={label}>
-          {icon}
-          <span className="hidden sm:inline">{label}</span>
-        </button>
-      ))}
+      {VIEWS.map(({ mode, icon, label }) => {
+        const active = view === mode
+        return (
+          <button key={mode} onClick={() => onChange(mode)}
+            className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
+            style={{ color: active ? '#0A0A0A' : 'var(--muted)' }}
+            title={label}>
+            {active && (
+              <motion.div layoutId="view-pill" className="absolute inset-0 rounded-md"
+                style={{ background: 'var(--accent)' }}
+                transition={{ type: 'spring', stiffness: 500, damping: 35 }} />
+            )}
+            <span className="relative z-10 flex items-center gap-1.5">
+              {icon}
+              <span className="hidden sm:inline">{label}</span>
+            </span>
+          </button>
+        )
+      })}
     </div>
   )
 }

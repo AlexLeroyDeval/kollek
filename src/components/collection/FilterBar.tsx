@@ -3,8 +3,7 @@
 import { EyeOff, Eye, ArrowDownUp } from 'lucide-react'
 import { Condition, Completion, SortField } from '@/types'
 import { COMPLETIONS } from '@/lib/completion'
-
-const CONDITIONS: Condition[] = ['Mint', 'Very Good', 'Good', 'Fair', 'Poor']
+import { CONDITIONS } from '@/lib/condition'
 
 export type FilterState = {
   platformId: number | null
@@ -64,7 +63,7 @@ export function FilterBar({
         style={selectStyle}
       >
         <option value="">Tous états</option>
-        {CONDITIONS.map((c) => <option key={c} value={c}>{c}</option>)}
+        {CONDITIONS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
       </select>
 
       {/* Completion */}

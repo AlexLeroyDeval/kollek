@@ -8,10 +8,9 @@ import { toast } from 'sonner'
 import Image from 'next/image'
 import { CollectionEntry, Condition, Completion } from '@/types'
 import { COMPLETIONS, completionLabel } from '@/lib/completion'
+import { CONDITIONS, conditionLabel } from '@/lib/condition'
 import { isStandardEdition } from '@/lib/editions'
 import { EditionField } from './EditionField'
-
-const CONDITIONS: Condition[] = ['Mint', 'Very Good', 'Good', 'Fair', 'Poor']
 
 export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | null; onClose: () => void }) {
   const queryClient = useQueryClient()
@@ -111,8 +110,8 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
   return (
     <Dialog.Root open={!!entry} onOpenChange={(v) => { if (!v) onClose() }}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} />
-        <Dialog.Content className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl p-6 shadow-2xl"
+        <Dialog.Overlay className="dialog-overlay fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} />
+        <Dialog.Content className="dialog-content fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl p-6 shadow-2xl"
           style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
 
           <div className="flex items-start justify-between mb-6 gap-4">
@@ -143,7 +142,7 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
             <div className="flex-1 min-w-0 space-y-4">
               {!editing ? (
                 <>
-                  <Field label="État" value={entry.condition} />
+                  <Field label="État" value={conditionLabel(entry.condition)} />
                   <Field label="Completion" value={completionLabel(entry.completion)} />
                   {!isStandardEdition(entry.edition) && <Field label="Édition" value={entry.edition!} accent />}
                   <Field label="Prix d'achat" value={entry.purchase_price != null ? `${entry.purchase_price} €` : '—'} />
@@ -162,7 +161,7 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
                     <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>État</label>
                     <div className="flex flex-wrap gap-1.5">
                       {CONDITIONS.map((c) => (
-                        <Chip key={c} active={condition === c} onClick={() => setCondition(c)}>{c}</Chip>
+                        <Chip key={c.value} active={condition === c.value} onClick={() => setCondition(c.value)}>{c.label}</Chip>
                       ))}
                     </div>
                   </div>

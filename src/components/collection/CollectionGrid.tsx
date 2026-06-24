@@ -1,9 +1,10 @@
 'use client'
 
 import Image from 'next/image'
+import { motion } from 'framer-motion'
 import { CollectionEntry } from '@/types'
 import { completionLabel } from '@/lib/completion'
-import { CONDITION_COLOR } from '@/lib/condition'
+import { CONDITION_COLOR, conditionLabel } from '@/lib/condition'
 import { isStandardEdition } from '@/lib/editions'
 
 export function CollectionGrid({ data, onSelect }: { data: CollectionEntry[]; onSelect: (e: CollectionEntry) => void }) {
@@ -15,14 +16,20 @@ export function CollectionGrid({ data, onSelect }: { data: CollectionEntry[]; on
 
   return (
     <div className="p-6 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4">
-      {data.map((entry) => {
+      {data.map((entry, i) => {
         const game = entry.game
         const rawCover = game?.cover_front_url ?? null
         const coverUrl = rawCover?.startsWith('//') ? `https:${rawCover}` : rawCover
 
         return (
-          <div key={entry.id} onClick={() => onSelect(entry)} className="flex flex-col gap-2 group cursor-pointer">
-            <div className="relative aspect-[3/4] rounded-lg overflow-hidden transition-all duration-200 group-hover:-translate-y-1"
+          <motion.div key={entry.id} onClick={() => onSelect(entry)}
+            className="flex flex-col gap-2 group cursor-pointer"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: Math.min(i, 24) * 0.025, ease: [0.16, 1, 0.3, 1] }}
+            whileHover={{ y: -6 }}
+            whileTap={{ scale: 0.97 }}>
+            <div className="relative aspect-[3/4] rounded-lg overflow-hidden"
               style={{ background: 'var(--surface)', boxShadow: '0 0 0 1px var(--border)' }}>
               {coverUrl ? (
                 <Image src={coverUrl} alt={game?.title ?? ''} fill sizes="(max-width: 640px) 33vw, 160px"
@@ -37,7 +44,7 @@ export function CollectionGrid({ data, onSelect }: { data: CollectionEntry[]; on
               {/* Pastille d'état (haut gauche) */}
               <div className="absolute top-1.5 left-1.5 w-2.5 h-2.5 rounded-full ring-2"
                 style={{ background: CONDITION_COLOR[entry.condition], '--tw-ring-color': 'rgba(0,0,0,0.4)' } as React.CSSProperties}
-                title={entry.condition} />
+                title={conditionLabel(entry.condition)} />
 
               {/* Badge Vendu (haut droite) */}
               {entry.is_sold && (
@@ -62,7 +69,7 @@ export function CollectionGrid({ data, onSelect }: { data: CollectionEntry[]; on
                 {game?.platform?.abbreviation ?? game?.platform?.name} · {completionLabel(entry.completion)}
               </p>
             </div>
-          </div>
+          </motion.div>
         )
       })}
     </div>

@@ -3,10 +3,12 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import * as Dialog from '@radix-ui/react-dialog'
+import { motion } from 'framer-motion'
 import { Search, X, Plus, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { IgdbGame, Condition, Completion } from '@/types'
 import { COMPLETIONS } from '@/lib/completion'
+import { CONDITIONS } from '@/lib/condition'
 import { useDebounce } from '@/hooks/useDebounce'
 import { EditionField } from './EditionField'
 import Image from 'next/image'
@@ -18,8 +20,6 @@ type SelectedGame = IgdbGame & {
   selectedPlatformAbbr?: string
   selectedPlatformFamily?: string
 }
-
-const CONDITIONS: Condition[] = ['Mint', 'Very Good', 'Good', 'Fair', 'Poor']
 
 export function AddGameDialog() {
   const [open, setOpen] = useState(false)
@@ -110,16 +110,18 @@ export function AddGameDialog() {
   return (
     <Dialog.Root open={open} onOpenChange={(v) => { if (!v) handleClose(); else setOpen(true) }}>
       <Dialog.Trigger asChild>
-        <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-          style={{ background: 'var(--accent)', color: '#0A0A0A' }}>
+        <motion.button className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
+          style={{ background: 'var(--accent)', color: '#0A0A0A' }}
+          whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 17 }}>
           <Plus size={16} />
           Ajouter un jeu
-        </button>
+        </motion.button>
       </Dialog.Trigger>
 
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} />
-        <Dialog.Content className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl p-6 shadow-2xl"
+        <Dialog.Overlay className="dialog-overlay fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} />
+        <Dialog.Content className="dialog-content fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl p-6 shadow-2xl"
           style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
 
           <div className="flex items-center justify-between mb-6">
@@ -228,12 +230,12 @@ export function AddGameDialog() {
                   <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>État</label>
                   <div className="flex flex-wrap gap-1.5">
                     {CONDITIONS.map((c) => (
-                      <button key={c} onClick={() => setCondition(c)}
+                      <button key={c.value} onClick={() => setCondition(c.value)}
                         className="px-2.5 py-1 rounded text-xs transition-colors"
-                        style={condition === c
+                        style={condition === c.value
                           ? { background: 'var(--accent)', color: '#0A0A0A' }
                           : { background: 'var(--background)', color: 'var(--foreground)', border: '1px solid var(--border)' }}>
-                        {c}
+                        {c.label}
                       </button>
                     ))}
                   </div>

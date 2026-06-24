@@ -2,7 +2,7 @@
 
 import { CollectionEntry } from '@/types'
 import { completionLabel } from '@/lib/completion'
-import { CONDITION_COLOR } from '@/lib/condition'
+import { CONDITION_COLOR, conditionLabel } from '@/lib/condition'
 import { isStandardEdition } from '@/lib/editions'
 
 export function CollectionList({ data, onSelect }: { data: CollectionEntry[]; onSelect: (e: CollectionEntry) => void }) {
@@ -44,7 +44,7 @@ export function CollectionList({ data, onSelect }: { data: CollectionEntry[]; on
                 <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full flex-shrink-0"
                     style={{ background: CONDITION_COLOR[entry.condition] ?? 'var(--muted)' }} />
-                  {entry.condition}
+                  {conditionLabel(entry.condition)}
                 </span>
               </td>
               <td className="px-4 py-3 whitespace-nowrap" style={{ color: 'var(--muted)' }}>{completionLabel(entry.completion)}</td>
