@@ -24,6 +24,22 @@
   box-sizing: border-box;
 }
 
+/* Curseur pointeur sur tout ce qui est cliquable
+   (en @layer base : requis par Tailwind v4 dont le preflight ne le fait plus) */
+@layer base {
+  button:not(:disabled),
+  [role="button"],
+  select,
+  summary,
+  a[href] {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -48,4 +64,21 @@ body {
 ::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 3px;
+}
+
+/* Skeleton shimmer */
+.shimmer {
+  background: linear-gradient(
+    100deg,
+    var(--surface) 30%,
+    var(--surface-hover) 50%,
+    var(--surface) 70%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }

@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { CollectionEntry } from '@/types'
 import { completionLabel } from '@/lib/completion'
+import { CONDITION_COLOR } from '@/lib/condition'
 
 export function CollectionGrid({ data, onSelect }: { data: CollectionEntry[]; onSelect: (e: CollectionEntry) => void }) {
   if (data.length === 0) return (
@@ -19,19 +20,27 @@ export function CollectionGrid({ data, onSelect }: { data: CollectionEntry[]; on
 
         return (
           <div key={entry.id} onClick={() => onSelect(entry)} className="flex flex-col gap-2 group cursor-pointer">
-            <div className="relative aspect-[3/4] rounded-lg overflow-hidden"
-              style={{ background: 'var(--surface)' }}>
+            <div className="relative aspect-[3/4] rounded-lg overflow-hidden transition-all duration-200 group-hover:-translate-y-1"
+              style={{ background: 'var(--surface)', boxShadow: '0 0 0 1px var(--border)' }}>
               {coverUrl ? (
-                <Image src={coverUrl} alt={game?.title ?? ''} fill className="object-cover transition-transform group-hover:scale-105" />
+                <Image src={coverUrl} alt={game?.title ?? ''} fill
+                  className={`object-cover transition-transform duration-300 group-hover:scale-105 ${entry.is_sold ? 'opacity-50 grayscale' : ''}`} />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-xs text-center p-2"
                   style={{ color: 'var(--muted)' }}>
                   {game?.title}
                 </div>
               )}
+
+              {/* Pastille d'état (haut gauche) */}
+              <div className="absolute top-1.5 left-1.5 w-2.5 h-2.5 rounded-full ring-2"
+                style={{ background: CONDITION_COLOR[entry.condition], '--tw-ring-color': 'rgba(0,0,0,0.4)' } as React.CSSProperties}
+                title={entry.condition} />
+
+              {/* Badge Vendu (haut droite) */}
               {entry.is_sold && (
-                <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-xs font-medium"
-                  style={{ background: 'rgba(0,0,0,0.75)', color: 'var(--muted)' }}>
+                <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide"
+                  style={{ background: 'var(--accent)', color: '#0A0A0A' }}>
                   Vendu
                 </div>
               )}

@@ -8,6 +8,7 @@ import { CollectionGrid } from './CollectionGrid'
 import { CollectionList } from './CollectionList'
 import { GameDetailDialog } from './GameDetailDialog'
 import { FilterBar, FilterState, DEFAULT_FILTERS } from './FilterBar'
+import { CollectionSkeleton } from './CollectionSkeleton'
 
 export function CollectionView() {
   const [view, setView] = useState<ViewMode>('grid')
@@ -72,11 +73,7 @@ export function CollectionView() {
       </div>
 
       {/* Content */}
-      {isLoading && (
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-sm" style={{ color: 'var(--muted)' }}>Chargement...</p>
-        </div>
-      )}
+      {isLoading && <CollectionSkeleton view={view} />}
 
       {error && (
         <div className="flex-1 flex items-center justify-center">
@@ -95,11 +92,6 @@ export function CollectionView() {
       {data && !isLoading && data.length === 0 && (
         <div className="flex-1 flex items-center justify-center">
           <p className="text-sm" style={{ color: 'var(--muted)' }}>Ta collection est vide. Ajoute ton premier jeu !</p>
-        </div>
-      )}
-      {data && !isLoading && visible.length > 0 && view === 'shelf' && (
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-sm" style={{ color: 'var(--muted)' }}>Shelf view — bientôt disponible</p>
         </div>
       )}
 

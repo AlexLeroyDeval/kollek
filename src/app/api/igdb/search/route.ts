@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { igdbQuery } from '@/lib/igdb/client'
+import { similarity } from '@/lib/fuzzy'
 import { IgdbGame } from '@/types'
 import { z } from 'zod'
 
 const schema = z.object({ q: z.string().min(1).max(100) })
+
+// En-dessous de ce nombre de résultats, on déclenche le repli fuzzy
+const SPARSE_THRESHOLD = 3
+const MAX_RESULTS = 20
 
 // Champs jeu réutilisés pour les deux requêtes
 const GAME_FIELDS =
@@ -19,8 +24,8 @@ export async function GET(req: NextRequest) {
   const result = schema.safeParse({ q: req.nextUrl.searchParams.get('q') })
   if (!result.success) return NextResponse.json({ error: 'Invalid query' }, { status: 400 })
 
-  // On retire les guillemets pour ne pas casser la requête Apicalypse
-  const q = result.data.q.replace(/"/g, '').trim()
+  // Normalisation : guillemets retirés, espaces compactés, trim
+  const q = result.data.q.replace(/"/g, '').replace(/\s+/g, ' ').trim()
   if (!q) return NextResponse.json([])
 
   // Requête 1 — search fuzzy classique (titres originaux/anglais)
@@ -56,21 +61,64 @@ export async function GET(req: NextRequest) {
   for (const alt of altResults) {
     const game = alt.game
     if (!game || !game.cover) continue // on garde la cohérence : cover obligatoire
-    const existing = byId.get(game.id)
-    if (existing) {
-      // déjà présent via search → on enrichit juste avec le titre matché
-      existing.matched_alt_name = alt.name
-    } else {
+    // Si le jeu est déjà trouvé par son nom, on garde son titre canonique.
+    // matched_alt_name n'est posé que pour les jeux trouvés UNIQUEMENT via titre alternatif.
+    if (!byId.has(game.id)) {
       byId.set(game.id, { ...game, matched_alt_name: alt.name })
     }
   }
 
-  // Les jeux matchés par titre FR remontent en tête
-  const merged = [...byId.values()].sort((a, b) => {
-    const aAlt = a.matched_alt_name ? 0 : 1
-    const bAlt = b.matched_alt_name ? 0 : 1
-    return aAlt - bAlt
-  })
+  // Cas nominal : assez de résultats → on préserve l'ordre de pertinence IGDB,
+  // et on ajoute les trouvailles par titre FR (absentes du search) à la fin.
+  if (byId.size >= SPARSE_THRESHOLD) {
+    const searchIds = new Set(searchResults.map((g) => g.id))
+    const ordered = [
+      ...searchResults, // ordre IGDB (enrichis de matched_alt_name si applicable)
+      ...[...byId.values()].filter((g) => !searchIds.has(g.id)), // alt-only
+    ]
+    return NextResponse.json(ordered.slice(0, MAX_RESULTS))
+  }
 
-  return NextResponse.json(merged)
+  // Repli fuzzy : résultats trop maigres (faute de frappe probable).
+  // On élargit le pool via une sous-chaîne robuste (début du mot le plus long,
+  // là où les fautes sont rares), puis on re-classe par similarité.
+  const longestToken = q.split(' ').sort((a, b) => b.length - a.length)[0] ?? q
+  const seed = longestToken.slice(0, 4)
+
+  if (seed.length >= 2) {
+    // Pool noms de jeux + pool titres alternatifs (FR/régionaux), via le même seed
+    const [namePool, altPool] = await Promise.all([
+      igdbQuery<IgdbGame[]>(
+        '/games',
+        `fields ${GAME_FIELDS};
+         where name ~ *"${seed}"* & cover != null;
+         limit 50;`
+      ).catch(() => [] as IgdbGame[]),
+      igdbQuery<AltNameResult[]>(
+        '/alternative_names',
+        `fields name, game.${GAME_FIELDS.split(', ').join(', game.')};
+         where name ~ *"${seed}"*;
+         limit 50;`
+      ).catch(() => [] as AltNameResult[]),
+    ])
+
+    for (const game of namePool) {
+      if (!byId.has(game.id)) byId.set(game.id, game)
+    }
+    for (const alt of altPool) {
+      const game = alt.game
+      if (!game || !game.cover) continue
+      if (!byId.has(game.id)) byId.set(game.id, { ...game, matched_alt_name: alt.name })
+    }
+  }
+
+  // Classement par similarité au texte saisi
+  const ranked = [...byId.values()]
+    .map((game) => ({ game, score: similarity(q, game.name, game.matched_alt_name) }))
+    .filter((r) => r.score >= 0.2)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, MAX_RESULTS)
+    .map((r) => r.game)
+
+  return NextResponse.json(ranked)
 }

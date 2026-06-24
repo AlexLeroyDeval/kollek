@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import * as Dialog from '@radix-ui/react-dialog'
 import { X, Trash2, Loader2, Pencil, Tag } from 'lucide-react'
+import { toast } from 'sonner'
 import Image from 'next/image'
 import { CollectionEntry, Condition, Completion } from '@/types'
 import { COMPLETIONS, completionLabel } from '@/lib/completion'
@@ -14,6 +15,7 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
   const queryClient = useQueryClient()
   const [editing, setEditing] = useState(false)
   const [sellMode, setSellMode] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const [condition, setCondition] = useState<Condition>('Very Good')
   const [completion, setCompletion] = useState<Completion>('loose')
@@ -34,6 +36,7 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
       setSaleDate(entry.sale_date ?? '')
       setEditing(false)
       setSellMode(false)
+      setConfirmDelete(false)
     }
   }, [entry])
 
@@ -47,11 +50,15 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
       if (!res.ok) throw new Error('Failed to update')
       return res.json()
     },
-    onSuccess: () => {
+    onSuccess: (_data, patch) => {
       queryClient.invalidateQueries({ queryKey: ['collection'] })
+      if (patch.is_sold === true) toast.success(`${game?.title} marqué comme vendu`)
+      else if (patch.is_sold === false) toast.success('Vente annulée')
+      else toast.success('Fiche mise à jour')
       setEditing(false)
       setSellMode(false)
     },
+    onError: () => toast.error('Échec de la mise à jour'),
   })
 
   const { mutate: remove, isPending: removing } = useMutation({
@@ -62,8 +69,10 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['collection'] })
+      toast.success(`${game?.title} supprimé de la collection`)
       onClose()
     },
+    onError: () => toast.error('Échec de la suppression'),
   })
 
   if (!entry) return null
@@ -186,12 +195,28 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
 
           {/* Actions */}
           <div className="flex items-center justify-between gap-3 pt-6 mt-2 border-t" style={{ borderColor: 'var(--border)' }}>
-            <button onClick={() => remove()} disabled={removing}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors disabled:opacity-50"
-              style={{ color: '#f87171' }}>
-              {removing ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-              Supprimer
-            </button>
+            {confirmDelete ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm" style={{ color: '#f87171' }}>Confirmer ?</span>
+                <button onClick={() => remove()} disabled={removing}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                  style={{ background: '#f87171', color: '#0A0A0A' }}>
+                  {removing ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                  Supprimer
+                </button>
+                <button onClick={() => setConfirmDelete(false)} className="px-3 py-2 rounded-lg text-sm"
+                  style={{ background: 'var(--background)', border: '1px solid var(--border)', color: 'var(--muted)' }}>
+                  Annuler
+                </button>
+              </div>
+            ) : (
+              <button onClick={() => setConfirmDelete(true)} disabled={removing}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors disabled:opacity-50"
+                style={{ color: '#f87171' }}>
+                <Trash2 size={14} />
+                Supprimer
+              </button>
+            )}
 
             <div className="flex items-center gap-2">
               {editing ? (

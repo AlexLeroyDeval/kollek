@@ -1,10 +1,9 @@
 'use client'
 
-import { LayoutGrid, List, BookOpen } from 'lucide-react'
+import { LayoutGrid, List } from 'lucide-react'
 import { ViewMode } from '@/types'
 
 const VIEWS: { mode: ViewMode; icon: React.ReactNode; label: string }[] = [
-  { mode: 'shelf', icon: <BookOpen size={15} />, label: 'Étagère' },
   { mode: 'grid', icon: <LayoutGrid size={15} />, label: 'Grille' },
   { mode: 'list', icon: <List size={15} />, label: 'Liste' },
 ]

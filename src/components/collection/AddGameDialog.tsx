@@ -1,24 +1,14 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import * as Dialog from '@radix-ui/react-dialog'
 import { Search, X, Plus, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { IgdbGame, Condition, Completion } from '@/types'
 import { COMPLETIONS } from '@/lib/completion'
+import { useDebounce } from '@/hooks/useDebounce'
 import Image from 'next/image'
-
-function useDebounce<T>(value: T, delay: number): T {
-  const [debounced, setDebounced] = useState(value)
-  const timerRef = { current: null as ReturnType<typeof setTimeout> | null }
-
-  useCallback(() => {
-    if (timerRef.current) clearTimeout(timerRef.current)
-    timerRef.current = setTimeout(() => setDebounced(value), delay)
-  }, [value, delay])()
-
-  return debounced
-}
 
 type SelectedGame = IgdbGame & { selectedPlatformId: number; selectedPlatformName: string; selectedPlatformAbbr?: string }
 
@@ -73,7 +63,11 @@ export function AddGameDialog() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['collection'] })
+      toast.success(`${selected?.matched_alt_name ?? selected?.name} ajouté à la collection`)
       handleClose()
+    },
+    onError: () => {
+      toast.error("Échec de l'ajout du jeu")
     },
   })
 

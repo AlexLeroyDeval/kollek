@@ -27,10 +27,13 @@ Usage initial : personnel (1 utilisateur, pas d'écran de login au MVP). L'archi
 
 | Version | Contenu |
 |---------|---------|
-| **MVP** | Gestion de collection — recherche IGDB, ajout, état, completion, prix achat/vente, vues shelf/list/grid, filtres, tri |
+| **MVP** | Gestion de collection — recherche IGDB, ajout, état, completion, prix achat/vente, **vues grid/list**, filtres, tri, polish UI/UX |
 | **v1.1** | Prix marché — PriceCharting + eBay FR, refresh automatique, valeur totale de collection |
 | **v1.2** | Wishlist — priorité, budget max, alerte prix |
+| **post-MVP** | **Shelf view 3D** (Spline + Cover Flow) — descopée du MVP le 2026-06-24 pour livrer plus vite ; reste l'identité visuelle cible |
 | **v2** | Multi-utilisateur, partage de collection, scan code-barres |
+
+> **Note de scope (2026-06-24)** : la shelf view 3D, initialement pièce maîtresse du MVP, est reportée en post-MVP. Le MVP livre les vues **grid** et **list**. La shelf 3D reste l'ambition produit mais n'est plus bloquante pour une première version utilisable.
 
 ---
 

@@ -2,14 +2,7 @@
 
 import { CollectionEntry } from '@/types'
 import { completionLabel } from '@/lib/completion'
-
-const CONDITION_COLOR: Record<string, string> = {
-  'Mint': '#4ade80',
-  'Very Good': '#86efac',
-  'Good': '#fbbf24',
-  'Fair': '#fb923c',
-  'Poor': '#f87171',
-}
+import { CONDITION_COLOR } from '@/lib/condition'
 
 export function CollectionList({ data, onSelect }: { data: CollectionEntry[]; onSelect: (e: CollectionEntry) => void }) {
   if (data.length === 0) return (
