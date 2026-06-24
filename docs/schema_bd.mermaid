@@ -1,0 +1,86 @@
+erDiagram
+    PLATFORM {
+        int id PK
+        int igdb_id
+        string name
+        string manufacturer
+        int release_year
+        int generation
+        string abbreviation
+    }
+
+    GAME {
+        int id PK
+        int igdb_id
+        int platform_id FK
+        string title
+        int release_year
+        string region
+        string cover_front_url
+        string cover_back_url
+        string cover_spine_url
+        int screenscraper_id
+    }
+
+    GENRE {
+        int id PK
+        int igdb_id
+        string name
+    }
+
+    PUBLISHER {
+        int id PK
+        int igdb_id
+        string name
+        string country
+    }
+
+    GAME_COMPANY {
+        int id PK
+        int game_id FK
+        int publisher_id FK
+        boolean is_developer
+        boolean is_publisher
+    }
+
+    COLLECTION {
+        int id PK
+        int game_id FK
+        string condition
+        string completion
+        float purchase_price
+        date purchase_date
+        boolean is_sold
+        float sale_price
+        date sale_date
+        string notes
+        date added_at
+    }
+
+    WISHLIST {
+        int id PK
+        int game_id FK
+        string priority
+        float max_budget
+        date added_date
+        string notes
+    }
+
+    MARKET_PRICE {
+        int id PK
+        int game_id FK
+        float loose_price
+        float cib_price
+        float graded_price
+        string currency
+        string source
+        date updated_at
+    }
+
+    PLATFORM ||--o{ GAME : "héberge"
+    GENRE ||--o{ GAME : "catégorise"
+    GAME ||--o{ GAME_COMPANY : "implique"
+    PUBLISHER ||--o{ GAME_COMPANY : "est"
+    GAME ||--o{ COLLECTION : "possédé dans"
+    GAME ||--o{ WISHLIST : "désiré dans"
+    GAME ||--o{ MARKET_PRICE : "évalué par"
