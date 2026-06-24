@@ -26,14 +26,14 @@ export function CollectionGrid({ data, onSelect }: { data: CollectionEntry[]; on
             className="flex flex-col gap-2 group cursor-pointer"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: Math.min(i, 24) * 0.025, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.3, delay: Math.min(i, 24) * 0.025, ease: [0.16, 1, 0.3, 1], y: { duration: 0.12, ease: 'easeOut' } }}
             whileHover={{ y: -6 }}
             whileTap={{ scale: 0.97 }}>
             <div className="relative aspect-[3/4] rounded-lg overflow-hidden"
               style={{ background: 'var(--surface)', boxShadow: '0 0 0 1px var(--border)' }}>
               {coverUrl ? (
                 <Image src={coverUrl} alt={game?.title ?? ''} fill sizes="(max-width: 640px) 33vw, 160px"
-                  className={`object-cover transition-transform duration-300 group-hover:scale-105 ${entry.is_sold ? 'opacity-50 grayscale' : ''}`} />
+                  className={`object-cover transition-transform duration-150 group-hover:scale-105 ${entry.is_sold ? 'opacity-50 grayscale' : ''}`} />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-xs text-center p-2"
                   style={{ color: 'var(--muted)' }}>
