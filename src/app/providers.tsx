@@ -1,6 +1,7 @@
 'use client'
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import * as Tooltip from '@radix-ui/react-tooltip'
 import { useState } from 'react'
 import { Toaster } from 'sonner'
 
@@ -11,7 +12,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <Tooltip.Provider delayDuration={150}>{children}</Tooltip.Provider>
       <Toaster
         theme="dark"
         position="bottom-right"

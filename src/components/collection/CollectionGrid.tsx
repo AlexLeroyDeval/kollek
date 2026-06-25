@@ -2,10 +2,13 @@
 
 import Image from 'next/image'
 import { motion } from 'framer-motion'
+import * as Tooltip from '@radix-ui/react-tooltip'
+import { TrendingUp, TrendingDown } from 'lucide-react'
 import { CollectionEntry } from '@/types'
 import { completionLabel } from '@/lib/completion'
 import { CONDITION_COLOR, conditionLabel } from '@/lib/condition'
 import { isStandardEdition } from '@/lib/editions'
+import { saleGainLoss } from '@/lib/pricing'
 
 export function CollectionGrid({ data, onSelect }: { data: CollectionEntry[]; onSelect: (e: CollectionEntry) => void }) {
   if (data.length === 0) return (
@@ -20,6 +23,8 @@ export function CollectionGrid({ data, onSelect }: { data: CollectionEntry[]; on
         const game = entry.game
         const rawCover = game?.cover_front_url ?? null
         const coverUrl = rawCover?.startsWith('//') ? `https:${rawCover}` : rawCover
+
+        const gain = saleGainLoss(entry)
 
         return (
           <motion.div key={entry.id} onClick={() => onSelect(entry)}
@@ -46,12 +51,26 @@ export function CollectionGrid({ data, onSelect }: { data: CollectionEntry[]; on
                 style={{ background: CONDITION_COLOR[entry.condition], '--tw-ring-color': 'rgba(0,0,0,0.4)' } as React.CSSProperties}
                 title={conditionLabel(entry.condition)} />
 
-              {/* Badge Vendu (haut droite) */}
+              {/* Badge Vendu (haut droite) — la plus/moins-value est en tooltip au hover */}
               {entry.is_sold && (
-                <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide"
-                  style={{ background: 'var(--accent)', color: '#0A0A0A' }}>
-                  Vendu
-                </div>
+                <Tooltip.Root>
+                  <Tooltip.Trigger asChild>
+                    <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide cursor-default"
+                      style={{ background: 'var(--accent)', color: '#0A0A0A' }}>
+                      Vendu
+                    </div>
+                  </Tooltip.Trigger>
+                  {gain && (
+                    <Tooltip.Portal>
+                      <Tooltip.Content side="top" sideOffset={4} className="tooltip-content z-50 rounded px-2 py-1 text-xs font-medium flex items-center gap-1"
+                        style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: gain.isGain ? '#4ade80' : '#f87171' }}>
+                        {gain.isGain ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                        {gain.isGain ? '+' : '−'}{Math.abs(gain.percent)}%
+                        <Tooltip.Arrow style={{ fill: 'var(--border)' }} />
+                      </Tooltip.Content>
+                    </Tooltip.Portal>
+                  )}
+                </Tooltip.Root>
               )}
 
               {/* Badge nombre d'exemplaires (haut droite, sous le badge Vendu si présent) */}
