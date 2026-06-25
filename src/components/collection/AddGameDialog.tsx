@@ -11,6 +11,8 @@ import { COMPLETIONS } from '@/lib/completion'
 import { CONDITIONS } from '@/lib/condition'
 import { useDebounce } from '@/hooks/useDebounce'
 import { EditionField } from './EditionField'
+import { Button } from '@/components/ui/Button'
+import { Chip } from '@/components/ui/Chip'
 import Image from 'next/image'
 
 type IgdbPlatform = NonNullable<IgdbGame['platforms']>[number]
@@ -231,13 +233,9 @@ export function AddGameDialog() {
                   <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>État</label>
                   <div className="flex flex-wrap gap-1.5">
                     {CONDITIONS.map((c) => (
-                      <button key={c.value} onClick={() => setCondition(c.value)}
-                        className="px-2.5 py-1 rounded text-xs transition-colors"
-                        style={condition === c.value
-                          ? { background: 'var(--accent)', color: 'var(--on-accent)' }
-                          : { background: 'var(--background)', color: 'var(--foreground)', border: '1px solid var(--border)' }}>
+                      <Chip key={c.value} active={condition === c.value} onClick={() => setCondition(c.value)}>
                         {c.label}
-                      </button>
+                      </Chip>
                     ))}
                   </div>
                 </div>
@@ -247,13 +245,9 @@ export function AddGameDialog() {
                   <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Completion</label>
                   <div className="flex flex-wrap gap-1.5">
                     {COMPLETIONS.map((c) => (
-                      <button key={c.value} onClick={() => setCompletion(c.value)}
-                        className="px-2.5 py-1 rounded text-xs transition-colors"
-                        style={completion === c.value
-                          ? { background: 'var(--accent)', color: 'var(--on-accent)' }
-                          : { background: 'var(--background)', color: 'var(--foreground)', border: '1px solid var(--border)' }}>
+                      <Chip key={c.value} active={completion === c.value} onClick={() => setCompletion(c.value)}>
                         {c.label}
-                      </button>
+                      </Chip>
                     ))}
                   </div>
                 </div>
@@ -289,16 +283,8 @@ export function AddGameDialog() {
 
               {/* Actions */}
               <div className="flex justify-end gap-3 pt-2">
-                <button onClick={handleClose} className="px-4 py-2 rounded-lg text-sm transition-colors"
-                  style={{ background: 'var(--background)', border: '1px solid var(--border)' }}>
-                  Annuler
-                </button>
-                <button onClick={() => addGame()} disabled={isPending}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50"
-                  style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}>
-                  {isPending && <Loader2 size={14} className="animate-spin" />}
-                  Ajouter à la collection
-                </button>
+                <Button variant="secondary" onClick={handleClose}>Annuler</Button>
+                <Button onClick={() => addGame()} loading={isPending}>Ajouter à la collection</Button>
               </div>
             </div>
           )}

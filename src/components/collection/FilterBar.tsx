@@ -4,6 +4,7 @@ import { EyeOff, Eye, ArrowDownUp } from 'lucide-react'
 import { Condition, Completion, SortField } from '@/types'
 import { COMPLETIONS } from '@/lib/completion'
 import { CONDITIONS } from '@/lib/condition'
+import { Button } from '@/components/ui/Button'
 
 export type FilterState = {
   platformId: number | null
@@ -78,17 +79,16 @@ export function FilterBar({
       </select>
 
       {/* Masquer vendus */}
-      <button
+      <Button
+        size="xs"
+        variant={filters.hideSold ? 'primary' : 'secondary'}
         onClick={() => set({ hideSold: !filters.hideSold })}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-colors"
-        style={filters.hideSold
-          ? { background: 'var(--accent)', color: 'var(--on-accent)' }
-          : selectStyle}
+        className="gap-1.5"
+        icon={filters.hideSold ? <EyeOff size={13} /> : <Eye size={13} />}
         title={filters.hideSold ? 'Vendus masqués' : 'Vendus visibles'}
       >
-        {filters.hideSold ? <EyeOff size={13} /> : <Eye size={13} />}
         Vendus
-      </button>
+      </Button>
 
       {/* Tri */}
       <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs" style={selectStyle}>

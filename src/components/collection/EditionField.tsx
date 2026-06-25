@@ -1,6 +1,7 @@
 'use client'
 
 import { editionsForFamily } from '@/lib/editions'
+import { Chip } from '@/components/ui/Chip'
 
 export function EditionField({
   value,
@@ -19,13 +20,9 @@ export function EditionField({
         {options.map((e) => {
           const active = value.trim().toLowerCase() === e.toLowerCase()
           return (
-            <button key={e} type="button" onClick={() => onChange(e === 'Standard' ? '' : e)}
-              className="px-2.5 py-1 rounded text-xs transition-colors"
-              style={active || (e === 'Standard' && !value.trim())
-                ? { background: 'var(--accent)', color: 'var(--on-accent)' }
-                : { background: 'var(--background)', color: 'var(--foreground)', border: '1px solid var(--border)' }}>
+            <Chip key={e} active={active || (e === 'Standard' && !value.trim())} onClick={() => onChange(e === 'Standard' ? '' : e)}>
               {e}
-            </button>
+            </Chip>
           )
         })}
       </div>
