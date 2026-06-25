@@ -111,7 +111,7 @@ export function AddGameDialog() {
     <Dialog.Root open={open} onOpenChange={(v) => { if (!v) handleClose(); else setOpen(true) }}>
       <Dialog.Trigger asChild>
         <motion.button className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
-          style={{ background: 'var(--accent)', color: '#0A0A0A' }}
+          style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}
           whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
           transition={{ type: 'spring', stiffness: 400, damping: 17 }}>
           <Plus size={16} />
@@ -233,7 +233,7 @@ export function AddGameDialog() {
                       <button key={c.value} onClick={() => setCondition(c.value)}
                         className="px-2.5 py-1 rounded text-xs transition-colors"
                         style={condition === c.value
-                          ? { background: 'var(--accent)', color: '#0A0A0A' }
+                          ? { background: 'var(--accent)', color: 'var(--on-accent)' }
                           : { background: 'var(--background)', color: 'var(--foreground)', border: '1px solid var(--border)' }}>
                         {c.label}
                       </button>
@@ -249,7 +249,7 @@ export function AddGameDialog() {
                       <button key={c.value} onClick={() => setCompletion(c.value)}
                         className="px-2.5 py-1 rounded text-xs transition-colors"
                         style={completion === c.value
-                          ? { background: 'var(--accent)', color: '#0A0A0A' }
+                          ? { background: 'var(--accent)', color: 'var(--on-accent)' }
                           : { background: 'var(--background)', color: 'var(--foreground)', border: '1px solid var(--border)' }}>
                         {c.label}
                       </button>
@@ -294,7 +294,7 @@ export function AddGameDialog() {
                 </button>
                 <button onClick={() => addGame()} disabled={isPending}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50"
-                  style={{ background: 'var(--accent)', color: '#0A0A0A' }}>
+                  style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}>
                   {isPending && <Loader2 size={14} className="animate-spin" />}
                   Ajouter à la collection
                 </button>

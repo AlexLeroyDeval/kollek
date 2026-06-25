@@ -22,7 +22,7 @@ export function EditionField({
             <button key={e} type="button" onClick={() => onChange(e === 'Standard' ? '' : e)}
               className="px-2.5 py-1 rounded text-xs transition-colors"
               style={active || (e === 'Standard' && !value.trim())
-                ? { background: 'var(--accent)', color: '#0A0A0A' }
+                ? { background: 'var(--accent)', color: 'var(--on-accent)' }
                 : { background: 'var(--background)', color: 'var(--foreground)', border: '1px solid var(--border)' }}>
               {e}
             </button>

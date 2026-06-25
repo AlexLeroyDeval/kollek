@@ -17,7 +17,7 @@ export function ViewSelector({ view, onChange }: { view: ViewMode; onChange: (v:
         return (
           <button key={mode} onClick={() => onChange(mode)}
             className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
-            style={{ color: active ? '#0A0A0A' : 'var(--muted)' }}
+            style={{ color: active ? 'var(--on-accent)' : 'var(--muted)' }}
             title={label}>
             {active && (
               <motion.div layoutId="view-pill" className="absolute inset-0 rounded-md"

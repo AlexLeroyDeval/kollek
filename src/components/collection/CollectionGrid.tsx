@@ -100,14 +100,14 @@ export function CollectionGrid({ data, onSelect }: { data: CollectionEntry[]; on
                   <Tooltip.Root>
                     <Tooltip.Trigger asChild>
                       <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide cursor-default"
-                        style={{ background: 'var(--accent)', color: '#0A0A0A' }}>
+                        style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}>
                         Vendu
                       </div>
                     </Tooltip.Trigger>
                     {gain && (
                       <Tooltip.Portal>
                         <Tooltip.Content side="top" sideOffset={4} className="tooltip-content z-50 rounded px-2 py-1 text-xs font-medium flex items-center gap-1"
-                          style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: gain.isGain ? '#4ade80' : '#f87171' }}>
+                          style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: gain.isGain ? 'var(--success)' : 'var(--danger)' }}>
                           {gain.isGain ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                           {gain.isGain ? '+' : '−'}{Math.abs(gain.percent)}%
                           <Tooltip.Arrow style={{ fill: 'var(--border)' }} />
@@ -120,7 +120,7 @@ export function CollectionGrid({ data, onSelect }: { data: CollectionEntry[]; on
                 {/* Compteur d'exemplaires identiques (haut droite) */}
                 {count > 1 && (
                   <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold"
-                    style={{ background: 'var(--accent)', color: '#0A0A0A' }}
+                    style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}
                     title={`${count} exemplaires identiques`}>
                     ×{count}
                   </div>
