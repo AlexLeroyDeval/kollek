@@ -11,6 +11,8 @@ import { COMPLETIONS } from '@/lib/completion'
 import { CONDITIONS } from '@/lib/condition'
 import { useDebounce } from '@/hooks/useDebounce'
 import { EditionField } from './EditionField'
+import { Button } from '@/components/ui/Button'
+import { Chip } from '@/components/ui/Chip'
 import Image from 'next/image'
 
 type IgdbPlatform = NonNullable<IgdbGame['platforms']>[number]
@@ -120,7 +122,7 @@ export function AddGameDialog() {
       </Dialog.Trigger>
 
       <Dialog.Portal>
-        <Dialog.Overlay className="dialog-overlay fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} />
+        <Dialog.Overlay className="dialog-overlay fixed inset-0 z-40" />
         <Dialog.Content className="dialog-content fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl p-6 shadow-2xl"
           style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
 
@@ -148,9 +150,10 @@ export function AddGameDialog() {
                 {isFetching && <Loader2 size={16} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin" style={{ color: 'var(--muted)' }} />}
               </div>
 
-              {/* Results */}
+              {/* Results — couche GPU dédiée : limite les repaints qui font
+                  clignoter le backdrop-filter de l'overlay en scroll rapide */}
               {results && results.length > 0 && (
-                <div className="space-y-1 max-h-96 overflow-y-auto">
+                <div className="space-y-1 max-h-96 overflow-y-auto transform-gpu" style={{ contain: 'paint' }}>
                   {results.map((game) => (
                     <div key={game.id}>
                       {game.platforms && game.platforms.length > 1 ? (
@@ -230,13 +233,9 @@ export function AddGameDialog() {
                   <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>État</label>
                   <div className="flex flex-wrap gap-1.5">
                     {CONDITIONS.map((c) => (
-                      <button key={c.value} onClick={() => setCondition(c.value)}
-                        className="px-2.5 py-1 rounded text-xs transition-colors"
-                        style={condition === c.value
-                          ? { background: 'var(--accent)', color: 'var(--on-accent)' }
-                          : { background: 'var(--background)', color: 'var(--foreground)', border: '1px solid var(--border)' }}>
+                      <Chip key={c.value} active={condition === c.value} onClick={() => setCondition(c.value)}>
                         {c.label}
-                      </button>
+                      </Chip>
                     ))}
                   </div>
                 </div>
@@ -246,13 +245,9 @@ export function AddGameDialog() {
                   <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Completion</label>
                   <div className="flex flex-wrap gap-1.5">
                     {COMPLETIONS.map((c) => (
-                      <button key={c.value} onClick={() => setCompletion(c.value)}
-                        className="px-2.5 py-1 rounded text-xs transition-colors"
-                        style={completion === c.value
-                          ? { background: 'var(--accent)', color: 'var(--on-accent)' }
-                          : { background: 'var(--background)', color: 'var(--foreground)', border: '1px solid var(--border)' }}>
+                      <Chip key={c.value} active={completion === c.value} onClick={() => setCompletion(c.value)}>
                         {c.label}
-                      </button>
+                      </Chip>
                     ))}
                   </div>
                 </div>
@@ -288,16 +283,8 @@ export function AddGameDialog() {
 
               {/* Actions */}
               <div className="flex justify-end gap-3 pt-2">
-                <button onClick={handleClose} className="px-4 py-2 rounded-lg text-sm transition-colors"
-                  style={{ background: 'var(--background)', border: '1px solid var(--border)' }}>
-                  Annuler
-                </button>
-                <button onClick={() => addGame()} disabled={isPending}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50"
-                  style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}>
-                  {isPending && <Loader2 size={14} className="animate-spin" />}
-                  Ajouter à la collection
-                </button>
+                <Button variant="secondary" onClick={handleClose}>Annuler</Button>
+                <Button onClick={() => addGame()} loading={isPending}>Ajouter à la collection</Button>
               </div>
             </div>
           )}

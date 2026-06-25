@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import * as Dialog from '@radix-ui/react-dialog'
-import { X, Trash2, Loader2, Pencil, Tag, Copy, ChevronLeft, ChevronRight } from 'lucide-react'
+import { X, Trash2, Pencil, Tag, Copy, ChevronLeft, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
 import Image from 'next/image'
 import { CollectionEntry, Condition, Completion } from '@/types'
@@ -11,6 +11,8 @@ import { COMPLETIONS, completionLabel } from '@/lib/completion'
 import { CONDITIONS, CONDITION_COLOR, conditionLabel } from '@/lib/condition'
 import { isStandardEdition } from '@/lib/editions'
 import { EditionField } from './EditionField'
+import { Button } from '@/components/ui/Button'
+import { Chip } from '@/components/ui/Chip'
 
 export function GameDetailDialog({ entry, siblings, onNavigate, onClose }: {
   entry: CollectionEntry | null
@@ -141,7 +143,7 @@ export function GameDetailDialog({ entry, siblings, onNavigate, onClose }: {
   return (
     <Dialog.Root open={!!entry} onOpenChange={(v) => { if (!v) onClose() }}>
       <Dialog.Portal>
-        <Dialog.Overlay className="dialog-overlay fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} />
+        <Dialog.Overlay className="dialog-overlay fixed inset-0 z-40" />
         <Dialog.Content className="dialog-content fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl p-6 shadow-2xl"
           style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
 
@@ -277,75 +279,47 @@ export function GameDetailDialog({ entry, siblings, onNavigate, onClose }: {
             {confirmDelete ? (
               <div className="flex items-center gap-2">
                 <span className="text-sm" style={{ color: 'var(--danger)' }}>Confirmer ?</span>
-                <button onClick={() => remove()} disabled={removing}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
-                  style={{ background: 'var(--danger)', color: 'var(--on-accent)' }}>
-                  {removing ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                <Button variant="dangerSolid" size="sm" onClick={() => remove()} loading={removing} icon={<Trash2 size={14} />}>
                   Supprimer
-                </button>
-                <button onClick={() => setConfirmDelete(false)} className="px-3 py-2 rounded-lg text-sm"
-                  style={{ background: 'var(--background)', border: '1px solid var(--border)', color: 'var(--muted)' }}>
+                </Button>
+                <Button variant="secondary" size="sm" style={{ color: 'var(--muted)' }} onClick={() => setConfirmDelete(false)}>
                   Annuler
-                </button>
+                </Button>
               </div>
             ) : (
               <div className="flex items-center gap-1">
-                <button onClick={() => setConfirmDelete(true)} disabled={removing}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors disabled:opacity-50"
-                  style={{ color: 'var(--danger)' }}>
-                  <Trash2 size={14} />
+                <Button variant="ghostDanger" size="sm" onClick={() => setConfirmDelete(true)} disabled={removing} icon={<Trash2 size={14} />}>
                   Supprimer
-                </button>
-                <button onClick={() => duplicate()} disabled={duplicating}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors disabled:opacity-50 hover:opacity-70"
-                  style={{ color: 'var(--muted)' }}
-                  title="Créer un exemplaire identique">
-                  {duplicating ? <Loader2 size={14} className="animate-spin" /> : <Copy size={14} />}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => duplicate()} loading={duplicating} icon={<Copy size={14} />} title="Créer un exemplaire identique">
                   Dupliquer
-                </button>
+                </Button>
               </div>
             )}
 
             <div className="flex items-center gap-2">
               {editing ? (
                 <>
-                  <button onClick={() => setEditing(false)} className="px-4 py-2 rounded-lg text-sm"
-                    style={{ background: 'var(--background)', border: '1px solid var(--border)' }}>Annuler</button>
-                  <button onClick={handleSaveEdit} disabled={saving}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
-                    style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}>
-                    {saving && <Loader2 size={14} className="animate-spin" />}Enregistrer
-                  </button>
+                  <Button variant="secondary" onClick={() => setEditing(false)}>Annuler</Button>
+                  <Button onClick={handleSaveEdit} loading={saving}>Enregistrer</Button>
                 </>
               ) : sellMode ? (
                 <>
-                  <button onClick={() => setSellMode(false)} className="px-4 py-2 rounded-lg text-sm"
-                    style={{ background: 'var(--background)', border: '1px solid var(--border)' }}>Annuler</button>
-                  <button onClick={handleSell} disabled={saving}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
-                    style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}>
-                    {saving && <Loader2 size={14} className="animate-spin" />}Confirmer la vente
-                  </button>
+                  <Button variant="secondary" onClick={() => setSellMode(false)}>Annuler</Button>
+                  <Button onClick={handleSell} loading={saving}>Confirmer la vente</Button>
                 </>
               ) : (
                 <>
                   {entry.is_sold ? (
-                    <button onClick={handleUnsell} disabled={saving} className="px-3 py-2 rounded-lg text-sm"
-                      style={{ background: 'var(--background)', border: '1px solid var(--border)', color: 'var(--muted)' }}>
+                    <Button variant="secondary" size="sm" style={{ color: 'var(--muted)' }} onClick={handleUnsell} disabled={saving}>
                       Annuler la vente
-                    </button>
+                    </Button>
                   ) : (
-                    <button onClick={() => setSellMode(true)}
-                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm"
-                      style={{ background: 'var(--background)', border: '1px solid var(--border)' }}>
-                      <Tag size={14} />Vendre
-                    </button>
+                    <Button variant="secondary" size="sm" onClick={() => setSellMode(true)} icon={<Tag size={14} />}>
+                      Vendre
+                    </Button>
                   )}
-                  <button onClick={() => setEditing(true)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
-                    style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}>
-                    <Pencil size={14} />Modifier
-                  </button>
+                  <Button onClick={() => setEditing(true)} icon={<Pencil size={14} />}>Modifier</Button>
                 </>
               )}
             </div>
@@ -362,17 +336,6 @@ function Field({ label, value, accent }: { label: string; value: string; accent?
       <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--muted)' }}>{label}</p>
       <p className="text-sm" style={accent ? { color: 'var(--accent)' } : undefined}>{value}</p>
     </div>
-  )
-}
-
-function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button onClick={onClick} className="px-2.5 py-1 rounded text-xs transition-colors"
-      style={active
-        ? { background: 'var(--accent)', color: 'var(--on-accent)' }
-        : { background: 'var(--background)', color: 'var(--foreground)', border: '1px solid var(--border)' }}>
-      {children}
-    </button>
   )
 }
 

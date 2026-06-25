@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { Button } from '@/components/ui/Button'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -70,14 +70,9 @@ export default function LoginPage() {
             className="w-full px-3 py-2.5 rounded-lg text-sm outline-none"
             style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--foreground)' }}
           />
-          <button
-            type="submit" disabled={loading}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50"
-            style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}
-          >
-            {loading && <Loader2 size={15} className="animate-spin" />}
+          <Button type="submit" loading={loading} className="w-full">
             {mode === 'signin' ? 'Se connecter' : "S'inscrire"}
-          </button>
+          </Button>
         </form>
 
         <p className="text-xs text-center mt-6" style={{ color: 'var(--muted)' }}>
