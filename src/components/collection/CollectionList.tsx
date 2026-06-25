@@ -83,7 +83,7 @@ export function CollectionList({ data, onSelect, activeId }: { data: CollectionE
                     )}
                     {gain && (
                       <span className="flex items-center gap-0.5 text-xs font-medium"
-                        style={{ color: gain.isGain ? '#4ade80' : '#f87171' }}
+                        style={{ color: gain.isGain ? 'var(--success)' : 'var(--danger)' }}
                         title="Plus/moins-value par rapport au prix d'achat">
                         {gain.isGain ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                         {gain.isGain ? '+' : '−'}{Math.abs(gain.percent)}%
@@ -91,7 +91,7 @@ export function CollectionList({ data, onSelect, activeId }: { data: CollectionE
                     )}
                   </span>
                 ) : (
-                  <span className="px-2 py-0.5 rounded text-xs" style={{ background: 'rgba(74,222,128,0.1)', color: '#4ade80' }}>En collection</span>
+                  <span className="px-2 py-0.5 rounded text-xs" style={{ background: 'var(--success-soft)', color: 'var(--success)' }}>En collection</span>
                 )}
               </td>
             </tr>

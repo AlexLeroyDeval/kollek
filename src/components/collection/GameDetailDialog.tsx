@@ -181,10 +181,10 @@ export function GameDetailDialog({ entry, siblings, onNavigate, onClose }: {
                     <button key={s.id} onClick={() => onNavigate(s.id)}
                       className="flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-colors"
                       style={active
-                        ? { background: 'var(--accent)', color: '#0A0A0A' }
+                        ? { background: 'var(--accent)', color: 'var(--on-accent)' }
                         : { background: 'var(--background)', color: 'var(--foreground)', border: '1px solid var(--border)' }}>
                       <span className="w-2 h-2 rounded-full flex-shrink-0"
-                        style={{ background: active ? '#0A0A0A' : (CONDITION_COLOR[s.condition] ?? 'var(--muted)') }} />
+                        style={{ background: active ? 'var(--on-accent)' : (CONDITION_COLOR[s.condition] ?? 'var(--muted)') }} />
                       #{idx + 1} · {conditionLabel(s.condition)}{s.is_sold ? ' · Vendu' : ''}
                     </button>
                   )
@@ -276,10 +276,10 @@ export function GameDetailDialog({ entry, siblings, onNavigate, onClose }: {
           <div className="flex items-center justify-between gap-3 pt-6 mt-2 border-t" style={{ borderColor: 'var(--border)' }}>
             {confirmDelete ? (
               <div className="flex items-center gap-2">
-                <span className="text-sm" style={{ color: '#f87171' }}>Confirmer ?</span>
+                <span className="text-sm" style={{ color: 'var(--danger)' }}>Confirmer ?</span>
                 <button onClick={() => remove()} disabled={removing}
                   className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
-                  style={{ background: '#f87171', color: '#0A0A0A' }}>
+                  style={{ background: 'var(--danger)', color: 'var(--on-accent)' }}>
                   {removing ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                   Supprimer
                 </button>
@@ -292,7 +292,7 @@ export function GameDetailDialog({ entry, siblings, onNavigate, onClose }: {
               <div className="flex items-center gap-1">
                 <button onClick={() => setConfirmDelete(true)} disabled={removing}
                   className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors disabled:opacity-50"
-                  style={{ color: '#f87171' }}>
+                  style={{ color: 'var(--danger)' }}>
                   <Trash2 size={14} />
                   Supprimer
                 </button>
@@ -313,7 +313,7 @@ export function GameDetailDialog({ entry, siblings, onNavigate, onClose }: {
                     style={{ background: 'var(--background)', border: '1px solid var(--border)' }}>Annuler</button>
                   <button onClick={handleSaveEdit} disabled={saving}
                     className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
-                    style={{ background: 'var(--accent)', color: '#0A0A0A' }}>
+                    style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}>
                     {saving && <Loader2 size={14} className="animate-spin" />}Enregistrer
                   </button>
                 </>
@@ -323,7 +323,7 @@ export function GameDetailDialog({ entry, siblings, onNavigate, onClose }: {
                     style={{ background: 'var(--background)', border: '1px solid var(--border)' }}>Annuler</button>
                   <button onClick={handleSell} disabled={saving}
                     className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
-                    style={{ background: 'var(--accent)', color: '#0A0A0A' }}>
+                    style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}>
                     {saving && <Loader2 size={14} className="animate-spin" />}Confirmer la vente
                   </button>
                 </>
@@ -343,7 +343,7 @@ export function GameDetailDialog({ entry, siblings, onNavigate, onClose }: {
                   )}
                   <button onClick={() => setEditing(true)}
                     className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
-                    style={{ background: 'var(--accent)', color: '#0A0A0A' }}>
+                    style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}>
                     <Pencil size={14} />Modifier
                   </button>
                 </>
@@ -369,7 +369,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
   return (
     <button onClick={onClick} className="px-2.5 py-1 rounded text-xs transition-colors"
       style={active
-        ? { background: 'var(--accent)', color: '#0A0A0A' }
+        ? { background: 'var(--accent)', color: 'var(--on-accent)' }
         : { background: 'var(--background)', color: 'var(--foreground)', border: '1px solid var(--border)' }}>
       {children}
     </button>

@@ -82,7 +82,7 @@ export function FilterBar({
         onClick={() => set({ hideSold: !filters.hideSold })}
         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-colors"
         style={filters.hideSold
-          ? { background: 'var(--accent)', color: '#0A0A0A' }
+          ? { background: 'var(--accent)', color: 'var(--on-accent)' }
           : selectStyle}
         title={filters.hideSold ? 'Vendus masqués' : 'Vendus visibles'}
       >

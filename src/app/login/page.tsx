@@ -73,7 +73,7 @@ export default function LoginPage() {
           <button
             type="submit" disabled={loading}
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50"
-            style={{ background: 'var(--accent)', color: '#0A0A0A' }}
+            style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}
           >
             {loading && <Loader2 size={15} className="animate-spin" />}
             {mode === 'signin' ? 'Se connecter' : "S'inscrire"}
