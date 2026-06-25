@@ -54,6 +54,14 @@ export function CollectionGrid({ data, onSelect }: { data: CollectionEntry[]; on
                 </div>
               )}
 
+              {/* Badge nombre d'exemplaires (haut droite, sous le badge Vendu si présent) */}
+              {entry.quantity > 1 && (
+                <div className="absolute right-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold"
+                  style={{ top: entry.is_sold ? '1.75rem' : '0.375rem', background: 'rgba(0,0,0,0.78)', color: 'var(--foreground)' }}>
+                  ×{entry.quantity}
+                </div>
+              )}
+
               {/* Badge Édition (bas) */}
               {!isStandardEdition(entry.edition) && (
                 <div className="absolute bottom-1.5 left-1.5 right-1.5 px-1.5 py-0.5 rounded text-[10px] font-medium truncate text-center"

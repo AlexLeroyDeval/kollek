@@ -10,6 +10,7 @@ import { CollectionEntry, Condition, Completion } from '@/types'
 import { COMPLETIONS, completionLabel } from '@/lib/completion'
 import { CONDITIONS, conditionLabel } from '@/lib/condition'
 import { isStandardEdition } from '@/lib/editions'
+import { parseQuantity } from '@/lib/quantity'
 import { EditionField } from './EditionField'
 
 export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | null; onClose: () => void }) {
@@ -21,6 +22,7 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
   const [condition, setCondition] = useState<Condition>('Very Good')
   const [completion, setCompletion] = useState<Completion>('loose')
   const [edition, setEdition] = useState('')
+  const [quantity, setQuantity] = useState(1)
   const [purchasePrice, setPurchasePrice] = useState('')
   const [purchaseDate, setPurchaseDate] = useState('')
   const [notes, setNotes] = useState('')
@@ -32,6 +34,7 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
       setCondition(entry.condition)
       setCompletion(entry.completion)
       setEdition(entry.edition ?? '')
+      setQuantity(entry.quantity ?? 1)
       setPurchasePrice(entry.purchase_price?.toString() ?? '')
       setPurchaseDate(entry.purchase_date ?? '')
       setNotes(entry.notes ?? '')
@@ -92,6 +95,7 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
       condition,
       completion,
       edition: edition.trim() || null,
+      quantity,
       purchase_price: purchasePrice ? parseFloat(purchasePrice) : null,
       purchase_date: purchaseDate || null,
       notes: notes || null,
@@ -147,6 +151,7 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
                 <>
                   <Field label="État" value={conditionLabel(entry.condition)} />
                   <Field label="Completion" value={completionLabel(entry.completion)} />
+                  {entry.quantity > 1 && <Field label="Exemplaires" value={`${entry.quantity}`} accent />}
                   {!isStandardEdition(entry.edition) && <Field label="Édition" value={entry.edition!} accent />}
                   <Field label="Prix d'achat" value={entry.purchase_price != null ? `${entry.purchase_price} €` : '—'} />
                   <Field label="Date d'achat" value={entry.purchase_date ? new Date(entry.purchase_date).toLocaleDateString('fr-FR') : '—'} />
@@ -180,6 +185,7 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
                   <div className="grid grid-cols-2 gap-3">
                     <Input label="Prix d'achat (€)" type="number" value={purchasePrice} onChange={setPurchasePrice} />
                     <Input label="Date d'achat" type="date" value={purchaseDate} onChange={setPurchaseDate} />
+                    <Input label="Exemplaires" type="number" min="1" step="1" value={`${quantity}`} onChange={(v) => setQuantity(parseQuantity(v))} />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Notes</label>
@@ -298,11 +304,11 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
   )
 }
 
-function Input({ label, type, value, onChange }: { label: string; type: string; value: string; onChange: (v: string) => void }) {
+function Input({ label, type, value, onChange, min, step }: { label: string; type: string; value: string; onChange: (v: string) => void; min?: string; step?: string }) {
   return (
     <div className="space-y-1.5">
       <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>{label}</label>
-      <input type={type} min={type === 'number' ? '0' : undefined} step={type === 'number' ? '0.01' : undefined}
+      <input type={type} min={type === 'number' ? (min ?? '0') : undefined} step={type === 'number' ? (step ?? '0.01') : undefined}
         value={value} onChange={(e) => onChange(e.target.value)}
         className="w-full px-3 py-2 rounded-lg text-sm outline-none"
         style={{ background: 'var(--background)', border: '1px solid var(--border)', color: 'var(--foreground)' }} />

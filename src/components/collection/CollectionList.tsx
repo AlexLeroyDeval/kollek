@@ -35,6 +35,12 @@ export function CollectionList({ data, onSelect }: { data: CollectionEntry[]; on
                       {entry.edition}
                     </span>
                   )}
+                  {entry.quantity > 1 && (
+                    <span className="flex-shrink-0 px-1.5 py-0.5 rounded text-[10px] font-medium"
+                      style={{ background: 'var(--surface-hover)', color: 'var(--accent)' }}>
+                      ×{entry.quantity}
+                    </span>
+                  )}
                 </span>
               </td>
               <td className="px-4 py-3 whitespace-nowrap" style={{ color: 'var(--muted)' }}>

@@ -60,6 +60,7 @@ create table collection (
   condition      text not null check (condition in ('Mint','Very Good','Good','Fair','Poor')),
   completion     text not null check (completion in ('loose','cib','box_game','box_notice','game_notice','notice','box','sealed')),
   edition        text, -- édition de l'exemplaire (Platinum, Greatest Hits, GOTY…), NULL = standard
+  quantity       integer not null default 1 check (quantity >= 1), -- nombre d'exemplaires identiques
   purchase_price numeric(10,2),
   purchase_date  date,
   is_sold        boolean not null default false,

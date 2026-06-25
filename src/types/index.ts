@@ -39,6 +39,7 @@ export type CollectionEntry = {
   condition: Condition
   completion: Completion
   edition: string | null
+  quantity: number
   purchase_price: number | null
   purchase_date: string | null
   is_sold: boolean
