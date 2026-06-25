@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import { CollectionEntry } from '@/types'
 import { completionLabel } from '@/lib/completion'
@@ -7,7 +8,15 @@ import { CONDITION_COLOR, conditionLabel } from '@/lib/condition'
 import { isStandardEdition } from '@/lib/editions'
 import { saleGainLoss } from '@/lib/pricing'
 
-export function CollectionList({ data, onSelect }: { data: CollectionEntry[]; onSelect: (e: CollectionEntry) => void }) {
+export function CollectionList({ data, onSelect, activeId }: { data: CollectionEntry[]; onSelect: (e: CollectionEntry) => void; activeId?: number | null }) {
+  const rowRefs = useRef<Map<number, HTMLTableRowElement>>(new Map())
+
+  // Quand l'exemplaire actif change (navigation depuis la modale), scrolle sa ligne en vue.
+  useEffect(() => {
+    if (activeId == null) return
+    rowRefs.current.get(activeId)?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  }, [activeId])
+
   if (data.length === 0) return (
     <div className="flex-1 flex items-center justify-center">
       <p className="text-sm" style={{ color: 'var(--muted)' }}>Ta collection est vide. Ajoute ton premier jeu !</p>
@@ -27,9 +36,16 @@ export function CollectionList({ data, onSelect }: { data: CollectionEntry[]; on
         <tbody>
           {data.map((entry) => {
             const gain = saleGainLoss(entry)
+            const active = entry.id === activeId
             return (
-            <tr key={entry.id} onClick={() => onSelect(entry)} className="transition-colors hover:opacity-80 cursor-pointer"
-              style={{ borderBottom: '1px solid var(--border)' }}>
+            <tr key={entry.id}
+              ref={(el) => { if (el) rowRefs.current.set(entry.id, el); else rowRefs.current.delete(entry.id) }}
+              onClick={() => onSelect(entry)} className="transition-colors hover:opacity-80 cursor-pointer"
+              style={{
+                borderBottom: '1px solid var(--border)',
+                background: active ? 'var(--surface-hover)' : undefined,
+                boxShadow: active ? 'inset 2px 0 0 var(--accent)' : undefined,
+              }}>
               <td className="px-4 py-3 font-medium max-w-[280px]">
                 <span className="flex items-center gap-2 min-w-0">
                   <span className="truncate">{entry.game?.title ?? '—'}</span>
@@ -37,12 +53,6 @@ export function CollectionList({ data, onSelect }: { data: CollectionEntry[]; on
                     <span className="flex-shrink-0 px-1.5 py-0.5 rounded text-[10px] font-medium"
                       style={{ background: 'var(--surface-hover)', color: 'var(--accent)' }}>
                       {entry.edition}
-                    </span>
-                  )}
-                  {entry.quantity > 1 && (
-                    <span className="flex-shrink-0 px-1.5 py-0.5 rounded text-[10px] font-medium"
-                      style={{ background: 'var(--surface-hover)', color: 'var(--accent)' }}>
-                      ×{entry.quantity}
                     </span>
                   )}
                 </span>

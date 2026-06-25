@@ -3,17 +3,21 @@
 import { useState, useEffect } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import * as Dialog from '@radix-ui/react-dialog'
-import { X, Trash2, Loader2, Pencil, Tag } from 'lucide-react'
+import { X, Trash2, Loader2, Pencil, Tag, Copy, ChevronLeft, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
 import Image from 'next/image'
 import { CollectionEntry, Condition, Completion } from '@/types'
 import { COMPLETIONS, completionLabel } from '@/lib/completion'
-import { CONDITIONS, conditionLabel } from '@/lib/condition'
+import { CONDITIONS, CONDITION_COLOR, conditionLabel } from '@/lib/condition'
 import { isStandardEdition } from '@/lib/editions'
-import { parseQuantity } from '@/lib/quantity'
 import { EditionField } from './EditionField'
 
-export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | null; onClose: () => void }) {
+export function GameDetailDialog({ entry, siblings, onNavigate, onClose }: {
+  entry: CollectionEntry | null
+  siblings: CollectionEntry[]
+  onNavigate: (id: number) => void
+  onClose: () => void
+}) {
   const queryClient = useQueryClient()
   const [editing, setEditing] = useState(false)
   const [sellMode, setSellMode] = useState(false)
@@ -22,7 +26,6 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
   const [condition, setCondition] = useState<Condition>('Very Good')
   const [completion, setCompletion] = useState<Completion>('loose')
   const [edition, setEdition] = useState('')
-  const [quantity, setQuantity] = useState(1)
   const [purchasePrice, setPurchasePrice] = useState('')
   const [purchaseDate, setPurchaseDate] = useState('')
   const [notes, setNotes] = useState('')
@@ -34,7 +37,6 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
       setCondition(entry.condition)
       setCompletion(entry.completion)
       setEdition(entry.edition ?? '')
-      setQuantity(entry.quantity ?? 1)
       setPurchasePrice(entry.purchase_price?.toString() ?? '')
       setPurchaseDate(entry.purchase_date ?? '')
       setNotes(entry.notes ?? '')
@@ -79,9 +81,28 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['collection'] })
       toast.success(`${game?.title} supprimé de la collection`)
-      onClose()
+      // S'il reste d'autres exemplaires du jeu, on bascule dessus ; sinon on ferme.
+      const next = siblings.find((s) => s.id !== entry!.id)
+      if (next) onNavigate(next.id)
+      else onClose()
     },
     onError: () => toast.error('Échec de la suppression'),
+  })
+
+  const { mutate: duplicate, isPending: duplicating } = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`/api/collection/${entry!.id}/duplicate`, { method: 'POST' })
+      if (!res.ok) throw new Error('Failed to duplicate')
+      return res.json() as Promise<{ id: number }>
+    },
+    onSuccess: async (created) => {
+      // Attendre le refetch pour que le nouvel exemplaire existe dans data avant
+      // d'y naviguer (sinon entry serait introuvable et la modale se fermerait).
+      await queryClient.invalidateQueries({ queryKey: ['collection'] })
+      toast.success('Exemplaire dupliqué')
+      onNavigate(created.id)
+    },
+    onError: () => toast.error('Échec de la duplication'),
   })
 
   if (!entry) return null
@@ -90,12 +111,15 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
   const rawCover = game?.cover_front_url ?? null
   const coverUrl = rawCover?.startsWith('//') ? `https:${rawCover}` : rawCover
 
+  // Position de l'exemplaire courant parmi toutes les copies du jeu.
+  const index = siblings.findIndex((s) => s.id === entry.id)
+  const total = siblings.length
+
   function handleSaveEdit() {
     save({
       condition,
       completion,
       edition: edition.trim() || null,
-      quantity,
       purchase_price: purchasePrice ? parseFloat(purchasePrice) : null,
       purchase_date: purchaseDate || null,
       notes: notes || null,
@@ -128,6 +152,47 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
             </Dialog.Close>
           </div>
 
+          {/* Navigation entre exemplaires du même jeu */}
+          {total > 1 && (
+            <div className="mb-5">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs font-medium" style={{ color: 'var(--muted)' }}>
+                  Exemplaire {index + 1} / {total}
+                </span>
+                <div className="flex items-center gap-1 ml-auto">
+                  <button onClick={() => onNavigate(siblings[index - 1].id)} disabled={index <= 0}
+                    aria-label="Exemplaire précédent"
+                    className="p-1 rounded transition-opacity disabled:opacity-30 hover:opacity-70"
+                    style={{ background: 'var(--background)', border: '1px solid var(--border)' }}>
+                    <ChevronLeft size={15} />
+                  </button>
+                  <button onClick={() => onNavigate(siblings[index + 1].id)} disabled={index >= total - 1}
+                    aria-label="Exemplaire suivant"
+                    className="p-1 rounded transition-opacity disabled:opacity-30 hover:opacity-70"
+                    style={{ background: 'var(--background)', border: '1px solid var(--border)' }}>
+                    <ChevronRight size={15} />
+                  </button>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {siblings.map((s, idx) => {
+                  const active = s.id === entry.id
+                  return (
+                    <button key={s.id} onClick={() => onNavigate(s.id)}
+                      className="flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-colors"
+                      style={active
+                        ? { background: 'var(--accent)', color: '#0A0A0A' }
+                        : { background: 'var(--background)', color: 'var(--foreground)', border: '1px solid var(--border)' }}>
+                      <span className="w-2 h-2 rounded-full flex-shrink-0"
+                        style={{ background: active ? '#0A0A0A' : (CONDITION_COLOR[s.condition] ?? 'var(--muted)') }} />
+                      #{idx + 1} · {conditionLabel(s.condition)}{s.is_sold ? ' · Vendu' : ''}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
           <div className="flex gap-6">
             {/* Cover */}
             <div className="flex-shrink-0 w-40">
@@ -151,7 +216,6 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
                 <>
                   <Field label="État" value={conditionLabel(entry.condition)} />
                   <Field label="Completion" value={completionLabel(entry.completion)} />
-                  {entry.quantity > 1 && <Field label="Exemplaires" value={`${entry.quantity}`} accent />}
                   {!isStandardEdition(entry.edition) && <Field label="Édition" value={entry.edition!} accent />}
                   <Field label="Prix d'achat" value={entry.purchase_price != null ? `${entry.purchase_price} €` : '—'} />
                   <Field label="Date d'achat" value={entry.purchase_date ? new Date(entry.purchase_date).toLocaleDateString('fr-FR') : '—'} />
@@ -185,7 +249,6 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
                   <div className="grid grid-cols-2 gap-3">
                     <Input label="Prix d'achat (€)" type="number" value={purchasePrice} onChange={setPurchasePrice} />
                     <Input label="Date d'achat" type="date" value={purchaseDate} onChange={setPurchaseDate} />
-                    <Input label="Exemplaires" type="number" min="1" step="1" value={`${quantity}`} onChange={(v) => setQuantity(parseQuantity(v))} />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Notes</label>
@@ -226,12 +289,21 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
                 </button>
               </div>
             ) : (
-              <button onClick={() => setConfirmDelete(true)} disabled={removing}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors disabled:opacity-50"
-                style={{ color: '#f87171' }}>
-                <Trash2 size={14} />
-                Supprimer
-              </button>
+              <div className="flex items-center gap-1">
+                <button onClick={() => setConfirmDelete(true)} disabled={removing}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors disabled:opacity-50"
+                  style={{ color: '#f87171' }}>
+                  <Trash2 size={14} />
+                  Supprimer
+                </button>
+                <button onClick={() => duplicate()} disabled={duplicating}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors disabled:opacity-50 hover:opacity-70"
+                  style={{ color: 'var(--muted)' }}
+                  title="Créer un exemplaire identique">
+                  {duplicating ? <Loader2 size={14} className="animate-spin" /> : <Copy size={14} />}
+                  Dupliquer
+                </button>
+              </div>
             )}
 
             <div className="flex items-center gap-2">
@@ -304,11 +376,11 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
   )
 }
 
-function Input({ label, type, value, onChange, min, step }: { label: string; type: string; value: string; onChange: (v: string) => void; min?: string; step?: string }) {
+function Input({ label, type, value, onChange }: { label: string; type: string; value: string; onChange: (v: string) => void }) {
   return (
     <div className="space-y-1.5">
       <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>{label}</label>
-      <input type={type} min={type === 'number' ? (min ?? '0') : undefined} step={type === 'number' ? (step ?? '0.01') : undefined}
+      <input type={type} min={type === 'number' ? '0' : undefined} step={type === 'number' ? '0.01' : undefined}
         value={value} onChange={(e) => onChange(e.target.value)}
         className="w-full px-3 py-2 rounded-lg text-sm outline-none"
         style={{ background: 'var(--background)', border: '1px solid var(--border)', color: 'var(--foreground)' }} />

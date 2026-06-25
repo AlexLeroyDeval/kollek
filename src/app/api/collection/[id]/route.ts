@@ -7,7 +7,6 @@ const updateSchema = z.object({
   condition: z.enum(['Mint', 'Very Good', 'Good', 'Fair', 'Poor']).optional(),
   completion: z.enum(COMPLETION_VALUES).optional(),
   edition: z.string().nullable().optional(),
-  quantity: z.number().int().min(1).optional(),
   purchase_price: z.number().nullable().optional(),
   purchase_date: z.string().nullable().optional(),
   is_sold: z.boolean().optional(),

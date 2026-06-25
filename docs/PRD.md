@@ -46,7 +46,7 @@ Usage initial : personnel. L'auth Supabase (email/mot de passe) est livrée au M
 - Recherche de jeux par titre via **IGDB** (on-demand, pas d'import bulk)
 - Sélection dans les résultats IGDB → création de la fiche en base
 - Cover art copiée dans **Supabase Storage** à l'ajout (pas de dépendance aux URLs IGDB)
-- Un même jeu peut avoir plusieurs entrées dans la collection (ex : plusieurs éditions)
+- Un même jeu peut avoir plusieurs entrées dans la collection. **Une entrée = un exemplaire physique** : deux copies du même jeu sont deux lignes, chacune avec son propre état, completion, édition, statut vendu et prix. Pas de compteur d'exemplaires (un tel compteur ne saurait pas représenter deux copies d'états différents).
 - Toutes les plateformes disponibles sur IGDB, sans filtre
 
 ### Fiche jeu
@@ -56,7 +56,6 @@ Usage initial : personnel. L'auth Supabase (email/mot de passe) est livrée au M
 | **État** | Comme neuf (Mint) / Très bon / Bon / Moyen / Mauvais. Codes stables en base, labels FR affichés. |
 | **Completion** | 8 niveaux : Vrac (`loose`) / Complet en boîte (`cib`) / Boîte + Jeu / Boîte + Notice / Jeu + Notice / Notice seule / Boîte seule / Neuf sous blister (`sealed`). Codes stables en base, labels FR affichés. |
 | **Édition** | Texte libre par copie (ex : « Platinum », « Player's Choice », réédition). Suggestions filtrées par famille de plateforme. |
-| **Exemplaires** | Entier ≥ 1, défaut 1. Nombre de copies identiques pour cette entrée. |
 | **Prix d'achat** | Montant + date |
 | **Statut vendu** | Oui / Non. Si oui : prix de vente + date de vente |
 | **Notes** | Texte avec formatting minimal (Markdown basique) |
@@ -69,8 +68,8 @@ Vues livrées au MVP, basculement permanent :
 
 | Vue | Description | Technologie |
 |-----|-------------|-------------|
-| **Grid view** (défaut) | Grille de covers 2D, dense, pour le browsing rapide. | CSS Grid + Next/Image |
-| **List view** | Tableau, une ligne par jeu, toutes les métadonnées visibles sans clic. | Table HTML |
+| **Grid view** (défaut) | Grille de covers 2D, dense, pour le browsing rapide. Les exemplaires possédés strictement identiques (jeu + état + completion + édition) sont empilés en une seule carte avec un compteur `×N` ; un exemplaire vendu ou qui diverge sort de la pile et s'affiche seul. | CSS Grid + Next/Image |
+| **List view** | Tableau, une ligne par exemplaire, toutes les métadonnées visibles sans clic. | Table HTML |
 | **Detail view** (overlay) | Métadonnées complètes + formulaire d'édition. | Radix Dialog + Framer Motion |
 
 La **Shelf view 3D** (étagère, mesh par plateforme, Cover Flow au focus) est descopée en post-MVP. La rotation 360° de l'objet 3D dans la detail view en dépend, donc elle suit le même report.
@@ -197,6 +196,7 @@ Décisions prises pendant le développement, qui n'étaient pas dans le draft 0.
 | 2026-06-24 | Shelf view 3D descopée en post-MVP | Livrer une première version utilisable plus vite ; grid/list suffisent pour cataloguer. |
 | 2026-06-24 | Completion passée de 3 à 8 niveaux | « Loose / CIB / Sealed » trop grossier pour le rétro : un jeu peut être boîte+jeu sans notice, notice seule, etc. Codes stables en base, labels FR. |
 | — | Champ `edition` par copie | Distinguer rééditions et variantes (Platinum, Player's Choice…) d'un même jeu. Suggestions filtrées par famille de plateforme. |
+| 2026-06-25 | Compteur `quantity` remplacé par une ligne par exemplaire | Un entier suppose des copies interchangeables ; or état, completion, statut vendu et prix diffèrent d'une copie à l'autre. Migration 005 : éclatement des `quantity > 1` en lignes, puis suppression de la colonne. La grille empile les copies identiques. |
 | 2026-06-25 | Auth email/mot de passe + collection par utilisateur livrée au MVP | L'archi Supabase la rendait peu coûteuse ; évite une migration de données plus tard. |
 | — | Estimation de revente Vinted abandonnée | Prototype scrappé : rate-limiting agressif, libs JS mortes, valeur faible pour le coût. |
 | — | PriceCharting reporté en v1.1 | Source payante. Sert aussi de piste pour les jaquettes FR/PAL absentes d'IGDB. |
