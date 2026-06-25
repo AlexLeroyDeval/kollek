@@ -9,7 +9,10 @@ const schema = z.object({ q: z.string().min(1).max(100) })
 
 // En-dessous de ce nombre de résultats, on déclenche le repli fuzzy
 const SPARSE_THRESHOLD = 3
-const MAX_RESULTS = 20
+// On en remonte beaucoup : les portages d'un même titre sont des fiches IGDB
+// distinctes, regroupées par jeu côté client. Sans marge, l'entrée d'une
+// plateforme donnée (ex. Game Boy) peut tomber sous le seuil et disparaître.
+const MAX_RESULTS = 50
 
 // Champs jeu réutilisés pour les deux requêtes
 const GAME_FIELDS =
@@ -39,7 +42,7 @@ export async function GET(req: NextRequest) {
     `search "${q}";
      fields ${GAME_FIELDS};
      where cover != null;
-     limit 20;`
+     limit 50;`
   )
 
   // Requête 2 — match sous-chaîne sur les titres alternatifs (titres FR/régionaux)
@@ -48,7 +51,7 @@ export async function GET(req: NextRequest) {
     '/alternative_names',
     `fields name, game.${GAME_FIELDS.split(', ').join(', game.')};
      where name ~ *"${q}"*;
-     limit 15;`
+     limit 25;`
   )
 
   const [searchResults, altResults] = await Promise.all([

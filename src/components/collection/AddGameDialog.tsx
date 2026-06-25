@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import * as Dialog from '@radix-ui/react-dialog'
 import { motion } from 'framer-motion'
-import { Search, X, Plus, Loader2 } from 'lucide-react'
+import { Search, X, Plus, Loader2, ChevronDown } from 'lucide-react'
 import { toast } from 'sonner'
 import { IgdbGame, Condition, Completion } from '@/types'
 import { COMPLETIONS } from '@/lib/completion'
@@ -23,9 +23,52 @@ type SelectedGame = IgdbGame & {
   selectedPlatformFamily?: string
 }
 
+type PlatformOption = { platform: IgdbPlatform; game: IgdbGame }
+type ResultGroup = {
+  key: string
+  displayName: string
+  /** Titre original si le match s'est fait via un nom alternatif (FR). */
+  originalName?: string
+  cover?: string
+  year?: number
+  options: PlatformOption[]
+}
+
+/**
+ * IGDB éclate les portages d'un même titre en fiches `game` distinctes (une par
+ * plateforme). On les regroupe par nom : une ligne par jeu, dépliable pour choisir
+ * la plateforme. Chaque plateforme pointe vers la fiche IGDB qui la porte.
+ */
+function groupResults(results: IgdbGame[]): ResultGroup[] {
+  const order: ResultGroup[] = []
+  const byKey = new Map<string, ResultGroup>()
+  for (const game of results) {
+    const key = game.name.trim().toLowerCase()
+    let g = byKey.get(key)
+    if (!g) {
+      g = {
+        key,
+        displayName: game.matched_alt_name ?? game.name,
+        originalName: game.matched_alt_name ? game.name : undefined,
+        cover: game.cover?.url,
+        year: game.first_release_date ? new Date(game.first_release_date * 1000).getFullYear() : undefined,
+        options: [],
+      }
+      byKey.set(key, g)
+      order.push(g)
+    }
+    if (!g.cover && game.cover?.url) g.cover = game.cover.url
+    for (const p of game.platforms ?? []) {
+      if (!g.options.some((o) => o.platform.id === p.id)) g.options.push({ platform: p, game })
+    }
+  }
+  return order.filter((g) => g.options.length > 0)
+}
+
 export function AddGameDialog() {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const [expandedKey, setExpandedKey] = useState<string | null>(null)
   const [selected, setSelected] = useState<SelectedGame | null>(null)
   const [condition, setCondition] = useState<Condition>('Very Good')
   const [completion, setCompletion] = useState<Completion>('loose')
@@ -46,6 +89,8 @@ export function AddGameDialog() {
     },
     enabled: debouncedQuery.length > 1,
   })
+
+  const groups = useMemo(() => groupResults(results ?? []), [results])
 
   const { mutate: addGame, isPending } = useMutation({
     mutationFn: async () => {
@@ -86,6 +131,7 @@ export function AddGameDialog() {
   function handleClose() {
     setOpen(false)
     setQuery('')
+    setExpandedKey(null)
     setSelected(null)
     setCondition('Very Good')
     setCompletion('loose')
@@ -143,56 +189,58 @@ export function AddGameDialog() {
                   type="text"
                   placeholder="Rechercher un jeu..."
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={(e) => { setQuery(e.target.value); setExpandedKey(null) }}
                   className="w-full pl-9 pr-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
                   style={{ background: 'var(--background)', border: '1px solid var(--border)', color: 'var(--foreground)' }}
                 />
                 {isFetching && <Loader2 size={16} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin" style={{ color: 'var(--muted)' }} />}
               </div>
 
-              {/* Results — couche GPU dédiée : limite les repaints qui font
-                  clignoter le backdrop-filter de l'overlay en scroll rapide */}
-              {results && results.length > 0 && (
+              {/* Results regroupés par jeu — couche GPU dédiée (contain) pour ne pas
+                  faire clignoter le backdrop-filter de l'overlay en scroll rapide */}
+              {groups.length > 0 && (
                 <div className="space-y-1 max-h-96 overflow-y-auto transform-gpu" style={{ contain: 'paint' }}>
-                  {results.map((game) => (
-                    <div key={game.id}>
-                      {game.platforms && game.platforms.length > 1 ? (
-                        game.platforms.map((p) => (
-                          <button key={p.id} onClick={() => selectGame(game, p)}
-                            className="w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors hover:opacity-80"
-                            style={{ background: 'var(--background)' }}>
-                            {game.cover && (
-                              <Image src={`https:${game.cover.url}`} alt={game.name} width={32} height={42}
-                                className="rounded object-cover flex-shrink-0" />
-                            )}
-                            <div className="min-w-0">
-                              <p className="text-sm font-medium truncate">{game.matched_alt_name ?? game.name}</p>
-                              <p className="text-xs truncate" style={{ color: 'var(--muted)' }}>
-                                {p.abbreviation ?? p.name}
-                                {game.matched_alt_name && ` · ${game.name}`}
-                              </p>
-                            </div>
-                          </button>
-                        ))
-                      ) : (
-                        <button onClick={() => selectGame(game, game.platforms![0])}
+                  {groups.map((g) => {
+                    const single = g.options.length === 1
+                    const expanded = expandedKey === g.key
+                    return (
+                      <div key={g.key}>
+                        <button
+                          onClick={() => single
+                            ? selectGame(g.options[0].game, g.options[0].platform)
+                            : setExpandedKey(expanded ? null : g.key)}
                           className="w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors hover:opacity-80"
                           style={{ background: 'var(--background)' }}>
-                          {game.cover && (
-                            <Image src={`https:${game.cover.url}`} alt={game.name} width={32} height={42}
+                          {g.cover && (
+                            <Image src={`https:${g.cover}`} alt={g.displayName} width={32} height={42}
                               className="rounded object-cover flex-shrink-0" />
                           )}
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium truncate">{game.matched_alt_name ?? game.name}</p>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium truncate">{g.displayName}</p>
                             <p className="text-xs truncate" style={{ color: 'var(--muted)' }}>
-                              {game.platforms?.[0]?.abbreviation ?? game.platforms?.[0]?.name ?? '—'}
-                              {game.matched_alt_name && ` · ${game.name}`}
+                              {single ? (g.options[0].platform.abbreviation ?? g.options[0].platform.name) : `${g.options.length} plateformes`}
+                              {g.year ? ` · ${g.year}` : ''}
+                              {g.originalName ? ` · ${g.originalName}` : ''}
                             </p>
                           </div>
+                          {!single && (
+                            <ChevronDown size={16} className="flex-shrink-0 transition-transform"
+                              style={{ color: 'var(--muted)', transform: expanded ? 'rotate(180deg)' : undefined }} />
+                          )}
                         </button>
-                      )}
-                    </div>
-                  ))}
+                        {!single && expanded && (
+                          <div className="flex flex-wrap gap-1.5 px-3 pt-1.5 pb-2">
+                            {g.options.map((o) => (
+                              <Button key={o.platform.id} variant="secondary" size="xs"
+                                onClick={() => selectGame(o.game, o.platform)}>
+                                {o.platform.abbreviation ?? o.platform.name}
+                              </Button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
               )}
 
