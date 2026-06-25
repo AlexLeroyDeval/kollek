@@ -41,7 +41,10 @@ export function GameDetailDialog({ entry, onClose }: { entry: CollectionEntry | 
       setSellMode(false)
       setConfirmDelete(false)
     }
-  }, [entry])
+    // Dépend de l'id seulement : on réinitialise le formulaire au changement de
+    // sélection, pas à chaque refetch du même item (sinon une saisie en cours saute).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entry?.id])
 
   const { mutate: save, isPending: saving } = useMutation({
     mutationFn: async (patch: Record<string, unknown>) => {

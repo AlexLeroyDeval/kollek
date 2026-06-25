@@ -12,7 +12,7 @@ import { CollectionSkeleton } from './CollectionSkeleton'
 
 export function CollectionView() {
   const [view, setView] = useState<ViewMode>('grid')
-  const [selected, setSelected] = useState<CollectionEntry | null>(null)
+  const [selectedId, setSelectedId] = useState<number | null>(null)
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS)
 
   const { data, isLoading, error } = useQuery<CollectionEntry[]>({
@@ -23,6 +23,12 @@ export function CollectionView() {
       return res.json()
     },
   })
+
+  // Dérivé de data pour rester à jour après une mutation (vente, édition…)
+  const selected = useMemo(
+    () => data?.find((e) => e.id === selectedId) ?? null,
+    [data, selectedId]
+  )
 
   // Plateformes présentes dans la collection (pour le filtre)
   const platforms = useMemo(() => {
@@ -87,15 +93,15 @@ export function CollectionView() {
         </div>
       )}
 
-      {data && !isLoading && visible.length > 0 && view === 'grid' && <CollectionGrid data={visible} onSelect={setSelected} />}
-      {data && !isLoading && visible.length > 0 && view === 'list' && <CollectionList data={visible} onSelect={setSelected} />}
+      {data && !isLoading && visible.length > 0 && view === 'grid' && <CollectionGrid data={visible} onSelect={(e) => setSelectedId(e.id)} />}
+      {data && !isLoading && visible.length > 0 && view === 'list' && <CollectionList data={visible} onSelect={(e) => setSelectedId(e.id)} />}
       {data && !isLoading && data.length === 0 && (
         <div className="flex-1 flex items-center justify-center">
           <p className="text-sm" style={{ color: 'var(--muted)' }}>Ta collection est vide. Ajoute ton premier jeu !</p>
         </div>
       )}
 
-      <GameDetailDialog entry={selected} onClose={() => setSelected(null)} />
+      <GameDetailDialog entry={selected} onClose={() => setSelectedId(null)} />
     </div>
   )
 }
