@@ -97,6 +97,17 @@ body {
 }
 
 /* Dialog animations (Radix data-state) */
+/* Voile flou. Le voile sombre (0.8) masque la frame où Chromium lâche la couche
+   backdrop-filter en scroll rapide ; translateZ promeut le flou sur sa propre
+   couche compositée pour réduire la fréquence du clignotement. */
+.dialog-overlay {
+  background: rgba(0, 0, 0, 0.8);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
 .dialog-overlay[data-state='open'] { animation: overlay-in 180ms ease-out; }
 .dialog-overlay[data-state='closed'] { animation: overlay-out 140ms ease-in; }
 .dialog-content[data-state='open'] { animation: content-in 220ms cubic-bezier(0.16, 1, 0.3, 1); }

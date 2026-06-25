@@ -141,7 +141,7 @@ export function GameDetailDialog({ entry, siblings, onNavigate, onClose }: {
   return (
     <Dialog.Root open={!!entry} onOpenChange={(v) => { if (!v) onClose() }}>
       <Dialog.Portal>
-        <Dialog.Overlay className="dialog-overlay fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} />
+        <Dialog.Overlay className="dialog-overlay fixed inset-0 z-40" />
         <Dialog.Content className="dialog-content fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl p-6 shadow-2xl"
           style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
 
