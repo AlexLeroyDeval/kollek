@@ -16,7 +16,7 @@ export const Active: Story = { args: { active: true } }
 
 export const Toggle: Story = {
   parameters: { controls: { disable: true } },
-  render: () => {
+  render: function Render() {
     const [active, setActive] = useState(false)
     return (
       <Chip active={active} onClick={() => setActive((v) => !v)}>

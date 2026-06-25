@@ -7,9 +7,10 @@ import * as Tooltip from '@radix-ui/react-tooltip'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import { CollectionEntry } from '@/types'
 import { completionLabel } from '@/lib/completion'
-import { CONDITION_COLOR, conditionLabel } from '@/lib/condition'
 import { isStandardEdition } from '@/lib/editions'
 import { saleGainLoss } from '@/lib/pricing'
+import { Badge } from '@/components/ui/Badge'
+import { ConditionDot } from '@/components/ui/ConditionDot'
 
 /**
  * Clé de regroupement des exemplaires en grille.
@@ -90,19 +91,16 @@ export function CollectionGrid({ data, onSelect }: { data: CollectionEntry[]; on
                 )}
 
                 {/* Pastille d'état (haut gauche) */}
-                <div className="absolute top-1.5 left-1.5 w-2.5 h-2.5 rounded-full ring-2"
-                  style={{ background: CONDITION_COLOR[entry.condition], '--tw-ring-color': 'rgba(0,0,0,0.4)' } as React.CSSProperties}
-                  title={conditionLabel(entry.condition)} />
+                <ConditionDot condition={entry.condition} ring className="absolute top-1.5 left-1.5 w-2.5 h-2.5" />
 
                 {/* Badge Vendu (haut droite) — la plus/moins-value est en tooltip au hover.
                     Une copie vendue n'est jamais empilée, donc pas de conflit avec le compteur. */}
                 {entry.is_sold && (
                   <Tooltip.Root>
                     <Tooltip.Trigger asChild>
-                      <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide cursor-default"
-                        style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}>
+                      <Badge tone="accent" size="sm" className="absolute top-1.5 right-1.5 font-semibold uppercase tracking-wide cursor-default">
                         Vendu
-                      </div>
+                      </Badge>
                     </Tooltip.Trigger>
                     {gain && (
                       <Tooltip.Portal>
@@ -119,11 +117,9 @@ export function CollectionGrid({ data, onSelect }: { data: CollectionEntry[]; on
 
                 {/* Compteur d'exemplaires identiques (haut droite) */}
                 {count > 1 && (
-                  <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold"
-                    style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}
-                    title={`${count} exemplaires identiques`}>
+                  <Badge tone="accent" size="sm" className="absolute top-1.5 right-1.5 font-semibold" title={`${count} exemplaires identiques`}>
                     ×{count}
-                  </div>
+                  </Badge>
                 )}
 
                 {/* Badge Édition (bas) */}

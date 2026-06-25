@@ -4,9 +4,10 @@ import { useEffect, useRef } from 'react'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import { CollectionEntry } from '@/types'
 import { completionLabel } from '@/lib/completion'
-import { CONDITION_COLOR, conditionLabel } from '@/lib/condition'
 import { isStandardEdition } from '@/lib/editions'
 import { saleGainLoss } from '@/lib/pricing'
+import { Badge } from '@/components/ui/Badge'
+import { ConditionBadge } from '@/components/ui/ConditionBadge'
 
 export function CollectionList({ data, onSelect, activeId }: { data: CollectionEntry[]; onSelect: (e: CollectionEntry) => void; activeId?: number | null }) {
   const rowRefs = useRef<Map<number, HTMLTableRowElement>>(new Map())
@@ -50,10 +51,7 @@ export function CollectionList({ data, onSelect, activeId }: { data: CollectionE
                 <span className="flex items-center gap-2 min-w-0">
                   <span className="truncate">{entry.game?.title ?? '—'}</span>
                   {!isStandardEdition(entry.edition) && (
-                    <span className="flex-shrink-0 px-1.5 py-0.5 rounded text-[10px] font-medium"
-                      style={{ background: 'var(--surface-hover)', color: 'var(--accent)' }}>
-                      {entry.edition}
-                    </span>
+                    <Badge tone="edition" className="flex-shrink-0">{entry.edition}</Badge>
                   )}
                 </span>
               </td>
@@ -61,11 +59,7 @@ export function CollectionList({ data, onSelect, activeId }: { data: CollectionE
                 {entry.game?.platform?.abbreviation ?? entry.game?.platform?.name ?? '—'}
               </td>
               <td className="px-4 py-3 whitespace-nowrap">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full flex-shrink-0"
-                    style={{ background: CONDITION_COLOR[entry.condition] ?? 'var(--muted)' }} />
-                  {conditionLabel(entry.condition)}
-                </span>
+                <ConditionBadge condition={entry.condition} />
               </td>
               <td className="px-4 py-3 whitespace-nowrap" style={{ color: 'var(--muted)' }}>{completionLabel(entry.completion)}</td>
               <td className="px-4 py-3 whitespace-nowrap">
@@ -77,7 +71,7 @@ export function CollectionList({ data, onSelect, activeId }: { data: CollectionE
               <td className="px-4 py-3 whitespace-nowrap">
                 {entry.is_sold ? (
                   <span className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded text-xs" style={{ background: 'var(--surface)', color: 'var(--muted)' }}>Vendu</span>
+                    <Badge tone="muted" size="md">Vendu</Badge>
                     {entry.sale_price != null && (
                       <span className="text-xs" style={{ color: 'var(--muted)' }}>{entry.sale_price} €</span>
                     )}
@@ -91,7 +85,7 @@ export function CollectionList({ data, onSelect, activeId }: { data: CollectionE
                     )}
                   </span>
                 ) : (
-                  <span className="px-2 py-0.5 rounded text-xs" style={{ background: 'var(--success-soft)', color: 'var(--success)' }}>En collection</span>
+                  <Badge tone="success" size="md">En collection</Badge>
                 )}
               </td>
             </tr>

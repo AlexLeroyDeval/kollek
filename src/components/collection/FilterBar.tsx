@@ -5,6 +5,7 @@ import { Condition, Completion, SortField } from '@/types'
 import { COMPLETIONS } from '@/lib/completion'
 import { CONDITIONS } from '@/lib/condition'
 import { Button } from '@/components/ui/Button'
+import { Select } from '@/components/ui/Select'
 
 export type FilterState = {
   platformId: number | null
@@ -44,39 +45,36 @@ export function FilterBar({
   return (
     <div className="flex flex-wrap items-center gap-2">
       {/* Plateforme */}
-      <select
+      <Select
         value={filters.platformId ?? ''}
-        onChange={(e) => set({ platformId: e.target.value ? Number(e.target.value) : null })}
-        className="px-2.5 py-1.5 rounded-lg text-xs outline-none cursor-pointer"
-        style={selectStyle}
+        onChange={(v) => set({ platformId: v ? Number(v) : null })}
+        aria-label="Plateforme"
       >
         <option value="">Toutes plateformes</option>
         {platforms.map((p) => (
           <option key={p.id} value={p.id}>{p.label}</option>
         ))}
-      </select>
+      </Select>
 
       {/* État */}
-      <select
+      <Select
         value={filters.condition ?? ''}
-        onChange={(e) => set({ condition: (e.target.value || null) as Condition | null })}
-        className="px-2.5 py-1.5 rounded-lg text-xs outline-none cursor-pointer"
-        style={selectStyle}
+        onChange={(v) => set({ condition: (v || null) as Condition | null })}
+        aria-label="État"
       >
         <option value="">Tous états</option>
         {CONDITIONS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
-      </select>
+      </Select>
 
       {/* Completion */}
-      <select
+      <Select
         value={filters.completion ?? ''}
-        onChange={(e) => set({ completion: (e.target.value || null) as Completion | null })}
-        className="px-2.5 py-1.5 rounded-lg text-xs outline-none cursor-pointer"
-        style={selectStyle}
+        onChange={(v) => set({ completion: (v || null) as Completion | null })}
+        aria-label="Completion"
       >
         <option value="">Toutes completions</option>
         {COMPLETIONS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
-      </select>
+      </Select>
 
       {/* Masquer vendus */}
       <Button
