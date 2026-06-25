@@ -1,9 +1,11 @@
 'use client'
 
+import { TrendingUp, TrendingDown } from 'lucide-react'
 import { CollectionEntry } from '@/types'
 import { completionLabel } from '@/lib/completion'
 import { CONDITION_COLOR, conditionLabel } from '@/lib/condition'
 import { isStandardEdition } from '@/lib/editions'
+import { saleGainLoss } from '@/lib/pricing'
 
 export function CollectionList({ data, onSelect }: { data: CollectionEntry[]; onSelect: (e: CollectionEntry) => void }) {
   if (data.length === 0) return (
@@ -23,7 +25,9 @@ export function CollectionList({ data, onSelect }: { data: CollectionEntry[]; on
           </tr>
         </thead>
         <tbody>
-          {data.map((entry) => (
+          {data.map((entry) => {
+            const gain = saleGainLoss(entry)
+            return (
             <tr key={entry.id} onClick={() => onSelect(entry)} className="transition-colors hover:opacity-80 cursor-pointer"
               style={{ borderBottom: '1px solid var(--border)' }}>
               <td className="px-4 py-3 font-medium max-w-[280px]">
@@ -61,12 +65,28 @@ export function CollectionList({ data, onSelect }: { data: CollectionEntry[]; on
                 {entry.purchase_date ? new Date(entry.purchase_date).toLocaleDateString('fr-FR') : '—'}
               </td>
               <td className="px-4 py-3 whitespace-nowrap">
-                {entry.is_sold
-                  ? <span className="px-2 py-0.5 rounded text-xs" style={{ background: 'var(--surface)', color: 'var(--muted)' }}>Vendu</span>
-                  : <span className="px-2 py-0.5 rounded text-xs" style={{ background: 'rgba(74,222,128,0.1)', color: '#4ade80' }}>En collection</span>}
+                {entry.is_sold ? (
+                  <span className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded text-xs" style={{ background: 'var(--surface)', color: 'var(--muted)' }}>Vendu</span>
+                    {entry.sale_price != null && (
+                      <span className="text-xs" style={{ color: 'var(--muted)' }}>{entry.sale_price} €</span>
+                    )}
+                    {gain && (
+                      <span className="flex items-center gap-0.5 text-xs font-medium"
+                        style={{ color: gain.isGain ? '#4ade80' : '#f87171' }}
+                        title="Plus/moins-value par rapport au prix d'achat">
+                        {gain.isGain ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                        {gain.isGain ? '+' : '−'}{Math.abs(gain.percent)}%
+                      </span>
+                    )}
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded text-xs" style={{ background: 'rgba(74,222,128,0.1)', color: '#4ade80' }}>En collection</span>
+                )}
               </td>
             </tr>
-          ))}
+            )
+          })}
         </tbody>
       </table>
     </div>
