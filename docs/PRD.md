@@ -1,6 +1,6 @@
 # Kollek — Product Requirements Document
 
-**Version :** 0.3  
+**Version :** 0.4  
 **Auteur :** Alexandre  
 **Date :** 25 juin 2026  
 **Stack :** Next.js 16 · React 19 · Supabase · Vercel · Spline · React Three Fiber
@@ -23,19 +23,47 @@ Usage initial : personnel. L'auth Supabase (email/mot de passe) est livrée au M
 
 ---
 
-## 3. Roadmap
+## 3. Vision & roadmap
 
-| Version | Contenu |
-|---------|---------|
-| **MVP** | Gestion de collection : recherche IGDB, ajout, état, completion, édition par copie, prix achat/vente, **vues grid/list**, filtres, tri, **auth email/mot de passe + collection par utilisateur**, polish UI/UX |
-| **v1.1** | Prix marché : PriceCharting + eBay FR, refresh automatique, valeur totale de collection |
-| **v1.2** | Wishlist : priorité, budget max, alerte prix |
-| **post-MVP** | **Shelf view 3D** (Spline + Cover Flow), descopée du MVP le 2026-06-24 pour livrer plus vite ; reste l'identité visuelle cible |
-| **v2** | Partage de collection, vitrine publique (favoris/à vendre), scan code-barres |
+### 3.1 Piliers produit
 
-> **Note de scope (2026-06-24)** : la shelf view 3D, initialement pièce maîtresse du MVP, est reportée en post-MVP. Le MVP livre les vues **grid** et **list**. La shelf 3D reste l'ambition produit mais n'est plus bloquante pour une première version utilisable.
+Quatre piliers portent l'évolution de Kollek au-delà du MVP. Le quatrième, le delight UX/UI, est transverse : c'est l'élément différenciant face à VGCollect et RetroCollect, qui sont fonctionnels mais sans plaisir d'usage.
+
+1. **Expérience collectionneur** : cataloguer vite et bien. Recherche, filtres, tri, types d'items au-delà des jeux (consoles, accessoires, notices), photos perso, fiche détaillée, ajout d'items absents du catalogue, wishlist.
+2. **Analytics & valeur** : comprendre sa collection. Valeur totale et par item, plus/moins-values, répartitions (plateforme, état, génération), évolution dans le temps.
+3. **Ventes & marché** : vendre et acheter mieux. Estimation de prix, aide à la création d'annonce, prix suggéré, recherche d'items convoités, vitrine publique ouverte à l'achat.
+4. **Delight UX/UI** (transverse) : faire de la consultation un plaisir. Shelf 3D, micro-interactions, soin des transitions et des moments clés. C'est ce qui doit donner envie d'ouvrir l'app sans raison fonctionnelle. Détaillé en §7.
+
+### 3.2 Fondations socles
+
+Trois chantiers techniques conditionnent une grande partie des features. À traiter en discovery avant de s'engager sur les versions qui en dépendent.
+
+| Socle | Débloque | Problème ouvert |
+|-------|----------|-----------------|
+| **Source de prix marché** | Analytics de valeur, aide à la vente, alertes wishlist | PriceCharting payant ; Vinted abandonné (rate-limiting). Sourcing à arbitrer : eBay sold listings, Leboncoin, PriceCharting payant. |
+| **Capture mobile** | Scan code-barres, photos perso, ajout sur le terrain (brocante) | PWA d'abord ou natif ? Flux capture photo, upload, offline/sync. |
+| **Qualité du catalogue** | Covers FR/PAL, variantes/régions, types d'items, items inconnus | IGDB incomplet sur le marché FR/PAL. Catalogue corrigeable localement, fusion de doublons, taxonomie des variantes. |
+
+### 3.3 Roadmap versionnée
+
+Versions indicatives, à réordonner selon la discovery sur les socles. Le numéro de version n'est pas un engagement de séquence stricte.
+
+| Version | Pilier | Contenu | Dépend de |
+|---------|--------|---------|-----------|
+| **MVP** ✅ | Collection | Recherche IGDB, ajout, état/completion/édition par exemplaire, prix achat/vente, grid/list, filtres, tri, auth multi-utilisateur | — |
+| **v1.1** | Analytics + Ventes | Source de prix marché, valeur de collection (totale + par item), plus/moins-value agrégée, historique de prix basique | Socle prix |
+| **v1.2** | Collection | Wishlist (priorité, budget max), alertes prix, matching wishlist ↔ collection | Socle prix |
+| **v1.3** | Collection + Delight | Capture mobile : scan code-barres, photos perso multi-vues + détourage Photoroom, cover perso à la place d'IGDB | Capture mobile |
+| **v1.4** | Collection | Catalogue étendu : types d'items (consoles, accessoires, notices), ajout d'items inconnus, correction de métadonnées, variantes/région | Qualité catalogue |
+| **v1.5** | Analytics | Dashboards : répartitions, valeur dans le temps, courbe d'acquisitions, export inventaire valorisé (PDF assurance), bilan annuel partageable | Socle prix |
+| **v2** | Ventes + Social | Vitrine publique ouverte à l'achat, partage de collection, génération d'annonces (titre/desc/photos + prix suggéré), troc via wishlists, communauté | Socle prix, vitrine |
+| **Continu** | Delight | Shelf 3D (Spline + Cover Flow), micro-interactions, design system, sound design léger. Premier gros incrément tôt, puis itératif. | Design system |
+
+> **Shelf 3D** : descopée du MVP le 2026-06-24, elle devient la pièce maîtresse du chantier delight transverse plutôt qu'une version isolée. Le MVP livre grid + list ; la shelf reste l'ambition visuelle cible.
 
 > **Note de scope (2026-06-25)** : l'auth Supabase et les collections par utilisateur, initialement listées en v2, ont été livrées dès le MVP (commit `c199f4c`). Voir §11 pour les décisions postérieures au draft initial.
+
+> **Discovery à venir** : on cadre les axes de discovery sur les items les plus prioritaires (socle prix, capture mobile, delight) avant de s'engager. Cette section sera complétée au fil de ces explorations.
 
 ---
 
@@ -144,6 +172,18 @@ Les appels IGDB sont proxifiés via une Next.js API Route — le token Twitch ne
 
 Toutes les autres plateformes utilisent une **boîte générique**.
 
+### Chantier UX/UI delight (différenciant)
+
+VGCollect et RetroCollect cataloguent mais ne donnent pas envie de revenir. Le pari de Kollek : faire de sa collection un objet qu'on a plaisir à manipuler. Le delight n'est pas une couche cosmétique ajoutée à la fin, il oriente les choix front (animations, 3D, perf) dès maintenant. Pistes concrètes, à prioriser en discovery :
+
+- **Shelf 3D** : étagère animée, Cover Flow au focus, rotation 360° d'un item. Pièce maîtresse de la différenciation.
+- **Moments clés soignés** : animation d'ajout (sensation de déballage), retournement de jaquette pour voir le dos, transitions de fiche fluides.
+- **Mobile tactile** : gestes, parallaxe, retour haptique à l'ajout et au scan.
+- **Bilan de collection** : récap visuel partageable (façon « wrapped ») — valeur, pièces phares, évolution sur l'année.
+- **États vides et de chargement** travaillés, déjà amorcés avec les skeletons.
+
+L'objectif mesurable : qu'un utilisateur ouvre l'app sans tâche précise, juste pour regarder sa collection.
+
 ---
 
 ## 8. Intégration API (MVP)
@@ -201,3 +241,4 @@ Décisions prises pendant le développement, qui n'étaient pas dans le draft 0.
 | — | Estimation de revente Vinted abandonnée | Prototype scrappé : rate-limiting agressif, libs JS mortes, valeur faible pour le coût. |
 | — | PriceCharting reporté en v1.1 | Source payante. Sert aussi de piste pour les jaquettes FR/PAL absentes d'IGDB. |
 | — | Vitrine publique (favoris / à vendre) | Idée pour v2, une fois le partage de collection en place. |
+| 2026-06-25 | Roadmap restructurée en piliers + socles (v0.4) | Le scope post-MVP s'est élargi (types d'items, photos, analytics, aide à la vente, social). Réorganisation en 4 piliers (dont delight UX/UI transverse comme différenciant) + 3 fondations socles (prix marché, capture mobile, qualité catalogue) dont dépendent les versions. Voir §3. |
