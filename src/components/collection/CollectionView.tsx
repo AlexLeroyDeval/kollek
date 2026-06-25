@@ -30,6 +30,15 @@ export function CollectionView() {
     [data, selectedId]
   )
 
+  // Tous les exemplaires du même jeu (vendus inclus), triés par id pour une
+  // numérotation stable. Permet de naviguer entre copies dans la modale.
+  const siblings = useMemo(() => {
+    if (!data || !selected) return []
+    return data
+      .filter((e) => e.game_id === selected.game_id)
+      .sort((a, b) => a.id - b.id)
+  }, [data, selected])
+
   // Plateformes présentes dans la collection (pour le filtre)
   const platforms = useMemo(() => {
     if (!data) return []
@@ -94,14 +103,14 @@ export function CollectionView() {
       )}
 
       {data && !isLoading && visible.length > 0 && view === 'grid' && <CollectionGrid data={visible} onSelect={(e) => setSelectedId(e.id)} />}
-      {data && !isLoading && visible.length > 0 && view === 'list' && <CollectionList data={visible} onSelect={(e) => setSelectedId(e.id)} />}
+      {data && !isLoading && visible.length > 0 && view === 'list' && <CollectionList data={visible} onSelect={(e) => setSelectedId(e.id)} activeId={selectedId} />}
       {data && !isLoading && data.length === 0 && (
         <div className="flex-1 flex items-center justify-center">
           <p className="text-sm" style={{ color: 'var(--muted)' }}>Ta collection est vide. Ajoute ton premier jeu !</p>
         </div>
       )}
 
-      <GameDetailDialog entry={selected} onClose={() => setSelectedId(null)} />
+      <GameDetailDialog entry={selected} siblings={siblings} onNavigate={setSelectedId} onClose={() => setSelectedId(null)} />
     </div>
   )
 }

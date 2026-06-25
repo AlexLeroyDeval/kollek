@@ -10,7 +10,6 @@ import { IgdbGame, Condition, Completion } from '@/types'
 import { COMPLETIONS } from '@/lib/completion'
 import { CONDITIONS } from '@/lib/condition'
 import { useDebounce } from '@/hooks/useDebounce'
-import { parseQuantity } from '@/lib/quantity'
 import { EditionField } from './EditionField'
 import Image from 'next/image'
 
@@ -29,7 +28,6 @@ export function AddGameDialog() {
   const [condition, setCondition] = useState<Condition>('Very Good')
   const [completion, setCompletion] = useState<Completion>('loose')
   const [edition, setEdition] = useState('')
-  const [quantity, setQuantity] = useState(1)
   const [purchasePrice, setPurchasePrice] = useState('')
   const [purchaseDate, setPurchaseDate] = useState('')
   const [notes, setNotes] = useState('')
@@ -65,7 +63,6 @@ export function AddGameDialog() {
           condition,
           completion,
           edition: edition.trim() || undefined,
-          quantity,
           purchase_price: purchasePrice ? parseFloat(purchasePrice) : undefined,
           purchase_date: purchaseDate || undefined,
           notes: notes || undefined,
@@ -91,7 +88,6 @@ export function AddGameDialog() {
     setCondition('Very Good')
     setCompletion('loose')
     setEdition('')
-    setQuantity(1)
     setPurchasePrice('')
     setPurchaseDate('')
     setNotes('')
@@ -274,15 +270,6 @@ export function AddGameDialog() {
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Date d'achat</label>
                   <input type="date" value={purchaseDate} onChange={(e) => setPurchaseDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-                    style={{ background: 'var(--background)', border: '1px solid var(--border)', color: 'var(--foreground)' }} />
-                </div>
-
-                {/* Quantity */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Exemplaires</label>
-                  <input type="number" min="1" step="1" inputMode="numeric" value={quantity}
-                    onChange={(e) => setQuantity(parseQuantity(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg text-sm outline-none"
                     style={{ background: 'var(--background)', border: '1px solid var(--border)', color: 'var(--foreground)' }} />
                 </div>
