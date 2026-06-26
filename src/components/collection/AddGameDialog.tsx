@@ -13,6 +13,8 @@ import { useDebounce } from '@/hooks/useDebounce'
 import { EditionField } from './EditionField'
 import { Button } from '@/components/ui/Button'
 import { Chip } from '@/components/ui/Chip'
+import { Input } from '@/components/ui/Input'
+import { Label } from '@/components/ui/Label'
 import Image from 'next/image'
 
 type IgdbPlatform = NonNullable<IgdbGame['platforms']>[number]
@@ -278,7 +280,7 @@ export function AddGameDialog() {
               <div className="grid grid-cols-2 gap-4">
                 {/* Condition */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>État</label>
+                  <Label>État</Label>
                   <div className="flex flex-wrap gap-1.5">
                     {CONDITIONS.map((c) => (
                       <Chip key={c.value} active={condition === c.value} onClick={() => setCondition(c.value)}>
@@ -290,7 +292,7 @@ export function AddGameDialog() {
 
                 {/* Completion */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Completion</label>
+                  <Label>Completion</Label>
                   <div className="flex flex-wrap gap-1.5">
                     {COMPLETIONS.map((c) => (
                       <Chip key={c.value} active={completion === c.value} onClick={() => setCompletion(c.value)}>
@@ -301,21 +303,10 @@ export function AddGameDialog() {
                 </div>
 
                 {/* Purchase price */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Prix d'achat (€)</label>
-                  <input type="number" min="0" step="0.01" placeholder="0.00" value={purchasePrice}
-                    onChange={(e) => setPurchasePrice(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-                    style={{ background: 'var(--background)', border: '1px solid var(--border)', color: 'var(--foreground)' }} />
-                </div>
+                <Input label="Prix d'achat (€)" type="number" placeholder="0.00" value={purchasePrice} onChange={setPurchasePrice} />
 
                 {/* Purchase date */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Date d'achat</label>
-                  <input type="date" value={purchaseDate} onChange={(e) => setPurchaseDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-                    style={{ background: 'var(--background)', border: '1px solid var(--border)', color: 'var(--foreground)' }} />
-                </div>
+                <Input label="Date d'achat" type="date" value={purchaseDate} onChange={setPurchaseDate} />
               </div>
 
               {/* Édition */}
@@ -323,7 +314,7 @@ export function AddGameDialog() {
 
               {/* Notes */}
               <div className="space-y-1.5">
-                <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Notes</label>
+                <Label>Notes</Label>
                 <textarea rows={3} placeholder="Notes libres..." value={notes} onChange={(e) => setNotes(e.target.value)}
                   className="w-full px-3 py-2 rounded-lg text-sm outline-none resize-none"
                   style={{ background: 'var(--background)', border: '1px solid var(--border)', color: 'var(--foreground)' }} />

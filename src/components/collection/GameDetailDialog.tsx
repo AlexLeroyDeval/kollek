@@ -13,6 +13,9 @@ import { isStandardEdition } from '@/lib/editions'
 import { EditionField } from './EditionField'
 import { Button } from '@/components/ui/Button'
 import { Chip } from '@/components/ui/Chip'
+import { Field } from '@/components/ui/Field'
+import { Input } from '@/components/ui/Input'
+import { Label } from '@/components/ui/Label'
 
 export function GameDetailDialog({ entry, siblings, onNavigate, onClose }: {
   entry: CollectionEntry | null
@@ -232,7 +235,7 @@ export function GameDetailDialog({ entry, siblings, onNavigate, onClose }: {
               ) : (
                 <>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>État</label>
+                    <Label>État</Label>
                     <div className="flex flex-wrap gap-1.5">
                       {CONDITIONS.map((c) => (
                         <Chip key={c.value} active={condition === c.value} onClick={() => setCondition(c.value)}>{c.label}</Chip>
@@ -240,7 +243,7 @@ export function GameDetailDialog({ entry, siblings, onNavigate, onClose }: {
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Completion</label>
+                    <Label>Completion</Label>
                     <div className="flex flex-wrap gap-1.5">
                       {COMPLETIONS.map((c) => (
                         <Chip key={c.value} active={completion === c.value} onClick={() => setCompletion(c.value)}>{c.label}</Chip>
@@ -253,7 +256,7 @@ export function GameDetailDialog({ entry, siblings, onNavigate, onClose }: {
                     <Input label="Date d'achat" type="date" value={purchaseDate} onChange={setPurchaseDate} />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Notes</label>
+                    <Label>Notes</Label>
                     <textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)}
                       className="w-full px-3 py-2 rounded-lg text-sm outline-none resize-none"
                       style={{ background: 'var(--background)', border: '1px solid var(--border)', color: 'var(--foreground)' }} />
@@ -330,23 +333,3 @@ export function GameDetailDialog({ entry, siblings, onNavigate, onClose }: {
   )
 }
 
-function Field({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
-  return (
-    <div>
-      <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--muted)' }}>{label}</p>
-      <p className="text-sm" style={accent ? { color: 'var(--accent)' } : undefined}>{value}</p>
-    </div>
-  )
-}
-
-function Input({ label, type, value, onChange }: { label: string; type: string; value: string; onChange: (v: string) => void }) {
-  return (
-    <div className="space-y-1.5">
-      <label className="text-xs font-medium" style={{ color: 'var(--muted)' }}>{label}</label>
-      <input type={type} min={type === 'number' ? '0' : undefined} step={type === 'number' ? '0.01' : undefined}
-        value={value} onChange={(e) => onChange(e.target.value)}
-        className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-        style={{ background: 'var(--background)', border: '1px solid var(--border)', color: 'var(--foreground)' }} />
-    </div>
-  )
-}
